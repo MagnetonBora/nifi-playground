@@ -1,0 +1,722 @@
+{
+  "flowContents": {
+    "identifier": "a846f307-a17a-5549-9ef2-2623f89e9be1",
+    "name": "Lab 6 - Splunk delivery",
+    "comments": "Event generator -> MergeRecord -> PutSplunk (TCP) or InvokeHTTP (HEC). Check: make lab-splunk-count",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "processGroups": [
+      {
+        "identifier": "465ca9d5-4491-528d-9312-ec1eb9667a86",
+        "name": "A - PutSplunk (TCP)",
+        "comments": "",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "processGroups": [],
+        "remoteProcessGroups": [],
+        "processors": [
+          {
+            "identifier": "9f7439b9-8ac7-5730-bbee-87221035c219",
+            "name": "GenerateRecord",
+            "comments": "Variant 1: small FlowFiles of 100 events",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "type": "org.apache.nifi.processors.standard.GenerateRecord",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Record Writer": "729bd9e7-1a7a-5893-a59e-ffbc1b6ddb1f",
+              "Number of Records": "100",
+              "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"GeneratedLogEvent\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Level\",\n        \"symbols\": [\n          \"INFO\",\n          \"WARN\",\n          \"ERROR\",\n          \"DEBUG\"\n        ]\n      }\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": {\n        \"type\": \"record\",\n        \"name\": \"GenUser\",\n        \"fields\": [\n          {\n            \"name\": \"id\",\n            \"type\": \"long\"\n          },\n          {\n            \"name\": \"pwd\",\n            \"type\": \"string\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "1 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "PRIMARY",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "465ca9d5-4491-528d-9312-ec1eb9667a86"
+          },
+          {
+            "identifier": "f233e6d4-d4e8-5f2c-b2a8-5e1b97d97fc4",
+            "name": "MergeRecord",
+            "comments": "Variant 2: batches of 10,000 events",
+            "position": {
+              "x": 0,
+              "y": 200
+            },
+            "type": "org.apache.nifi.processors.standard.MergeRecord",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Record Reader": "e2952151-83cd-5aae-ac01-2b9991596ff5",
+              "Record Writer": "729bd9e7-1a7a-5893-a59e-ffbc1b6ddb1f",
+              "Minimum Number of Records": "10000",
+              "Maximum Number of Records": "10000",
+              "Max Bin Age": "10 sec"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [
+              "original",
+              "failure"
+            ],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "465ca9d5-4491-528d-9312-ec1eb9667a86"
+          },
+          {
+            "identifier": "912890c8-8811-52a8-b159-fd243c7ffb56",
+            "name": "PutSplunk",
+            "comments": "Variant 3: Concurrent Tasks = 2, 4",
+            "position": {
+              "x": 0,
+              "y": 400
+            },
+            "type": "org.apache.nifi.processors.splunk.PutSplunk",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-splunk-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Hostname": "#{splunk.host}",
+              "Port": "#{splunk.port}",
+              "Protocol": "TCP",
+              "Message Delimiter": "\\n"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [
+              "success"
+            ],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "465ca9d5-4491-528d-9312-ec1eb9667a86"
+          },
+          {
+            "identifier": "0c6a9abb-c40a-5bf1-afee-54868f52fd95",
+            "name": "LogAttribute (failure)",
+            "comments": "",
+            "position": {
+              "x": 450,
+              "y": 400
+            },
+            "type": "org.apache.nifi.processors.standard.LogAttribute",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Log Level": "error"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [
+              "success"
+            ],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "465ca9d5-4491-528d-9312-ec1eb9667a86"
+          }
+        ],
+        "inputPorts": [],
+        "outputPorts": [],
+        "connections": [
+          {
+            "identifier": "a38913b2-9daf-548a-a4e5-b3253df07b5c",
+            "name": "",
+            "source": {
+              "id": "9f7439b9-8ac7-5730-bbee-87221035c219",
+              "type": "PROCESSOR",
+              "groupId": "465ca9d5-4491-528d-9312-ec1eb9667a86",
+              "name": "GenerateRecord",
+              "comments": ""
+            },
+            "destination": {
+              "id": "f233e6d4-d4e8-5f2c-b2a8-5e1b97d97fc4",
+              "type": "PROCESSOR",
+              "groupId": "465ca9d5-4491-528d-9312-ec1eb9667a86",
+              "name": "MergeRecord",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "success"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "465ca9d5-4491-528d-9312-ec1eb9667a86"
+          },
+          {
+            "identifier": "69c33810-37ca-53ea-a605-196e4de7b8c1",
+            "name": "",
+            "source": {
+              "id": "f233e6d4-d4e8-5f2c-b2a8-5e1b97d97fc4",
+              "type": "PROCESSOR",
+              "groupId": "465ca9d5-4491-528d-9312-ec1eb9667a86",
+              "name": "MergeRecord",
+              "comments": ""
+            },
+            "destination": {
+              "id": "912890c8-8811-52a8-b159-fd243c7ffb56",
+              "type": "PROCESSOR",
+              "groupId": "465ca9d5-4491-528d-9312-ec1eb9667a86",
+              "name": "PutSplunk",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "merged"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "465ca9d5-4491-528d-9312-ec1eb9667a86"
+          },
+          {
+            "identifier": "9a3d0672-1fcf-58dd-9579-609ccf2bb0c8",
+            "name": "",
+            "source": {
+              "id": "912890c8-8811-52a8-b159-fd243c7ffb56",
+              "type": "PROCESSOR",
+              "groupId": "465ca9d5-4491-528d-9312-ec1eb9667a86",
+              "name": "PutSplunk",
+              "comments": ""
+            },
+            "destination": {
+              "id": "0c6a9abb-c40a-5bf1-afee-54868f52fd95",
+              "type": "PROCESSOR",
+              "groupId": "465ca9d5-4491-528d-9312-ec1eb9667a86",
+              "name": "LogAttribute (failure)",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "failure"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "465ca9d5-4491-528d-9312-ec1eb9667a86"
+          }
+        ],
+        "labels": [],
+        "funnels": [],
+        "controllerServices": [],
+        "defaultFlowFileExpiration": "0 sec",
+        "defaultBackPressureObjectThreshold": 10000,
+        "defaultBackPressureDataSizeThreshold": "1 GB",
+        "scheduledState": "ENABLED",
+        "executionEngine": "INHERITED",
+        "maxConcurrentTasks": 1,
+        "statelessFlowTimeout": "1 min",
+        "flowFileConcurrency": "UNBOUNDED",
+        "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+        "componentType": "PROCESS_GROUP",
+        "parameterContextName": "lab6-params",
+        "groupIdentifier": "a846f307-a17a-5549-9ef2-2623f89e9be1"
+      },
+      {
+        "identifier": "b3cc0720-d9ad-5130-a432-414d58a93a9f",
+        "name": "B - InvokeHTTP (HEC)",
+        "comments": "",
+        "position": {
+          "x": 500,
+          "y": 0
+        },
+        "processGroups": [],
+        "remoteProcessGroups": [],
+        "processors": [
+          {
+            "identifier": "9f7439b9-8ac7-5730-bbee-87221035c219",
+            "name": "GenerateRecord",
+            "comments": "Variant 1: small FlowFiles of 100 events",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "type": "org.apache.nifi.processors.standard.GenerateRecord",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Record Writer": "729bd9e7-1a7a-5893-a59e-ffbc1b6ddb1f",
+              "Number of Records": "100",
+              "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"GeneratedLogEvent\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Level\",\n        \"symbols\": [\n          \"INFO\",\n          \"WARN\",\n          \"ERROR\",\n          \"DEBUG\"\n        ]\n      }\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": {\n        \"type\": \"record\",\n        \"name\": \"GenUser\",\n        \"fields\": [\n          {\n            \"name\": \"id\",\n            \"type\": \"long\"\n          },\n          {\n            \"name\": \"pwd\",\n            \"type\": \"string\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "1 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "PRIMARY",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b3cc0720-d9ad-5130-a432-414d58a93a9f"
+          },
+          {
+            "identifier": "f233e6d4-d4e8-5f2c-b2a8-5e1b97d97fc4",
+            "name": "MergeRecord",
+            "comments": "Variant 2: batches of 10,000 events",
+            "position": {
+              "x": 0,
+              "y": 200
+            },
+            "type": "org.apache.nifi.processors.standard.MergeRecord",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Record Reader": "e2952151-83cd-5aae-ac01-2b9991596ff5",
+              "Record Writer": "729bd9e7-1a7a-5893-a59e-ffbc1b6ddb1f",
+              "Minimum Number of Records": "10000",
+              "Maximum Number of Records": "10000",
+              "Max Bin Age": "10 sec"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [
+              "original",
+              "failure"
+            ],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b3cc0720-d9ad-5130-a432-414d58a93a9f"
+          },
+          {
+            "identifier": "435379b0-c7e3-51f6-836b-26e55dcab227",
+            "name": "InvokeHTTP",
+            "comments": "The dynamic Authorization property becomes an HTTP header",
+            "position": {
+              "x": 0,
+              "y": 400
+            },
+            "type": "org.apache.nifi.processors.standard.InvokeHTTP",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "HTTP Method": "POST",
+              "HTTP URL": "#{hec.url}",
+              "Request Content-Type": "application/json",
+              "Authorization": "Splunk #{hec.token}"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [
+              "Response",
+              "Original"
+            ],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b3cc0720-d9ad-5130-a432-414d58a93a9f"
+          },
+          {
+            "identifier": "0c6a9abb-c40a-5bf1-afee-54868f52fd95",
+            "name": "LogAttribute (failure)",
+            "comments": "",
+            "position": {
+              "x": 450,
+              "y": 400
+            },
+            "type": "org.apache.nifi.processors.standard.LogAttribute",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Log Level": "error"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [
+              "success"
+            ],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b3cc0720-d9ad-5130-a432-414d58a93a9f"
+          }
+        ],
+        "inputPorts": [],
+        "outputPorts": [],
+        "connections": [
+          {
+            "identifier": "a38913b2-9daf-548a-a4e5-b3253df07b5c",
+            "name": "",
+            "source": {
+              "id": "9f7439b9-8ac7-5730-bbee-87221035c219",
+              "type": "PROCESSOR",
+              "groupId": "b3cc0720-d9ad-5130-a432-414d58a93a9f",
+              "name": "GenerateRecord",
+              "comments": ""
+            },
+            "destination": {
+              "id": "f233e6d4-d4e8-5f2c-b2a8-5e1b97d97fc4",
+              "type": "PROCESSOR",
+              "groupId": "b3cc0720-d9ad-5130-a432-414d58a93a9f",
+              "name": "MergeRecord",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "success"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b3cc0720-d9ad-5130-a432-414d58a93a9f"
+          },
+          {
+            "identifier": "086f372a-e2e8-5933-85a2-ef32dab49c93",
+            "name": "",
+            "source": {
+              "id": "f233e6d4-d4e8-5f2c-b2a8-5e1b97d97fc4",
+              "type": "PROCESSOR",
+              "groupId": "b3cc0720-d9ad-5130-a432-414d58a93a9f",
+              "name": "MergeRecord",
+              "comments": ""
+            },
+            "destination": {
+              "id": "435379b0-c7e3-51f6-836b-26e55dcab227",
+              "type": "PROCESSOR",
+              "groupId": "b3cc0720-d9ad-5130-a432-414d58a93a9f",
+              "name": "InvokeHTTP",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "merged"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b3cc0720-d9ad-5130-a432-414d58a93a9f"
+          },
+          {
+            "identifier": "eaa7058e-12eb-5b65-94e9-87b6daa0fd04",
+            "name": "",
+            "source": {
+              "id": "435379b0-c7e3-51f6-836b-26e55dcab227",
+              "type": "PROCESSOR",
+              "groupId": "b3cc0720-d9ad-5130-a432-414d58a93a9f",
+              "name": "InvokeHTTP",
+              "comments": ""
+            },
+            "destination": {
+              "id": "0c6a9abb-c40a-5bf1-afee-54868f52fd95",
+              "type": "PROCESSOR",
+              "groupId": "b3cc0720-d9ad-5130-a432-414d58a93a9f",
+              "name": "LogAttribute (failure)",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "Failure",
+              "No Retry",
+              "Retry"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b3cc0720-d9ad-5130-a432-414d58a93a9f"
+          }
+        ],
+        "labels": [],
+        "funnels": [],
+        "controllerServices": [],
+        "defaultFlowFileExpiration": "0 sec",
+        "defaultBackPressureObjectThreshold": 10000,
+        "defaultBackPressureDataSizeThreshold": "1 GB",
+        "scheduledState": "ENABLED",
+        "executionEngine": "INHERITED",
+        "maxConcurrentTasks": 1,
+        "statelessFlowTimeout": "1 min",
+        "flowFileConcurrency": "UNBOUNDED",
+        "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+        "componentType": "PROCESS_GROUP",
+        "parameterContextName": "lab6-params",
+        "groupIdentifier": "a846f307-a17a-5549-9ef2-2623f89e9be1"
+      }
+    ],
+    "remoteProcessGroups": [],
+    "processors": [],
+    "inputPorts": [],
+    "outputPorts": [],
+    "connections": [],
+    "labels": [],
+    "funnels": [],
+    "controllerServices": [
+      {
+        "identifier": "e2952151-83cd-5aae-ac01-2b9991596ff5",
+        "name": "r-event",
+        "comments": "",
+        "type": "org.apache.nifi.json.JsonTreeReader",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-record-serialization-services-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Schema Access Strategy": "schema-text-property",
+          "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"GeneratedLogEvent\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Level\",\n        \"symbols\": [\n          \"INFO\",\n          \"WARN\",\n          \"ERROR\",\n          \"DEBUG\"\n        ]\n      }\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": {\n        \"type\": \"record\",\n        \"name\": \"GenUser\",\n        \"fields\": [\n          {\n            \"name\": \"id\",\n            \"type\": \"long\"\n          },\n          {\n            \"name\": \"pwd\",\n            \"type\": \"string\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+        },
+        "propertyDescriptors": {},
+        "controllerServiceApis": [
+          {
+            "type": "org.apache.nifi.serialization.RecordReaderFactory",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-services-api-nar",
+              "version": "2.12.0"
+            }
+          }
+        ],
+        "scheduledState": "DISABLED",
+        "bulletinLevel": "WARN",
+        "componentType": "CONTROLLER_SERVICE",
+        "groupIdentifier": "a846f307-a17a-5549-9ef2-2623f89e9be1"
+      },
+      {
+        "identifier": "729bd9e7-1a7a-5893-a59e-ffbc1b6ddb1f",
+        "name": "w-event-ndjson",
+        "comments": "",
+        "type": "org.apache.nifi.json.JsonRecordSetWriter",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-record-serialization-services-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Output Grouping": "output-oneline",
+          "Pretty Print JSON": "false",
+          "Schema Write Strategy": "no-schema",
+          "Schema Access Strategy": "inherit-record-schema"
+        },
+        "propertyDescriptors": {},
+        "controllerServiceApis": [
+          {
+            "type": "org.apache.nifi.serialization.RecordSetWriterFactory",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-services-api-nar",
+              "version": "2.12.0"
+            }
+          }
+        ],
+        "scheduledState": "DISABLED",
+        "bulletinLevel": "WARN",
+        "componentType": "CONTROLLER_SERVICE",
+        "groupIdentifier": "a846f307-a17a-5549-9ef2-2623f89e9be1"
+      }
+    ],
+    "defaultFlowFileExpiration": "0 sec",
+    "defaultBackPressureObjectThreshold": 10000,
+    "defaultBackPressureDataSizeThreshold": "1 GB",
+    "scheduledState": "ENABLED",
+    "executionEngine": "INHERITED",
+    "maxConcurrentTasks": 1,
+    "statelessFlowTimeout": "1 min",
+    "flowFileConcurrency": "UNBOUNDED",
+    "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+    "componentType": "PROCESS_GROUP",
+    "parameterContextName": "lab6-params"
+  },
+  "externalControllerServices": {},
+  "parameterContexts": {
+    "lab6-params": {
+      "name": "lab6-params",
+      "description": "Lab 6: Splunk emulator (lab-services)",
+      "parameters": [
+        {
+          "name": "splunk.host",
+          "value": "splunk-sim",
+          "description": "Emulator TCP input / HEC",
+          "sensitive": false,
+          "provided": false
+        },
+        {
+          "name": "splunk.port",
+          "value": "5514",
+          "description": "TCP input",
+          "sensitive": false,
+          "provided": false
+        },
+        {
+          "name": "hec.url",
+          "value": "http://splunk-sim:8088/services/collector/event",
+          "description": "HEC endpoint",
+          "sensitive": false,
+          "provided": false
+        },
+        {
+          "name": "hec.token",
+          "value": "00000000-0000-0000-0000-000000000000",
+          "description": "Demo HEC token (sensitive in production)",
+          "sensitive": false,
+          "provided": false
+        }
+      ],
+      "inheritedParameterContexts": [],
+      "componentType": "PARAMETER_CONTEXT"
+    }
+  },
+  "flowEncodingVersion": "1.0",
+  "parameterProviders": {},
+  "latest": false
+}

@@ -1,0 +1,5 @@
+nifi/certs/
+
+# Splunk: settings changed in the UI for the playground app
+splunk/apps/nifi_playground/local/
+splunk/apps/nifi_playground/metadata/local.meta

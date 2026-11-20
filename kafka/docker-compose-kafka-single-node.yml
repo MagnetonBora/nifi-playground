@@ -1,0 +1,93 @@
+# Single-node Kafka (KRaft) + Conduktor Console, attached to the shared "nifi-net" network
+#
+#   make kafka
+#
+# Bootstrap servers:
+#   from NiFi / other containers in nifi-net: kafka1:19092
+#   from the host:                            localhost:9092
+# Conduktor Console: http://localhost:8080
+
+services:
+  postgresql:
+    image: postgres:14
+    hostname: postgresql
+    restart: unless-stopped
+    volumes:
+      - conduktor_pg_data:/var/lib/postgresql/data
+    networks:
+      - nifi-net
+    environment:
+      POSTGRES_DB: "conduktor-console"
+      POSTGRES_USER: "conduktor"
+      POSTGRES_PASSWORD: "some_password"
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conduktor -d conduktor-console"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  conduktor-console:
+    image: conduktor/conduktor-console:1.41.0
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - conduktor_data:/var/conduktor
+    networks:
+      - nifi-net
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      kafka1:
+        condition: service_started
+    environment:
+      CDK_DATABASE_URL: "postgresql://conduktor:some_password@postgresql:5432/conduktor-console"
+      CDK_CLUSTERS_0_ID: "default"
+      CDK_CLUSTERS_0_NAME: "Cryptoflow Kafka Cluster"
+      CDK_CLUSTERS_0_COLOR: "#AAFFAA"
+      CDK_CLUSTERS_0_BOOTSTRAPSERVERS: "PLAINTEXT://kafka1:19092"
+      # CONSOLE_JAVA_OPTS: "-XX:UseSVE=0"
+
+  kafka1:
+    image: confluentinc/cp-kafka:8.0.0
+    hostname: kafka1
+    container_name: kafka1
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9999:9999" # JMX Port
+      - "9099:9099"  # Internal inter-broker communication
+    volumes:
+      # Topics, offsets and KRaft metadata; CLUSTER_ID below must stay the same for this data
+      - kafka1:/var/lib/kafka/data
+    networks:
+      - nifi-net
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka1:9099"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,EXTERNAL://0.0.0.0:9092,DOCKER://0.0.0.0:29092,CONTROLLER://0.0.0.0:9099
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:19092,EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092,DOCKER://host.docker.internal:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,DOCKER:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+
+volumes:
+  conduktor_pg_data:
+  kafka1:
+  conduktor_data:
+
+networks:
+  # Shared with the NiFi / registry / postgres / monitoring compose files
+  nifi-net:
+    external: true

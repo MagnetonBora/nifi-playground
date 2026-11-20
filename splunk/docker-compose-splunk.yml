@@ -1,0 +1,45 @@
+# Splunk Enterprise (trial license: 60 days, 500 MB/day; then Splunk Free, which has no login),
+# attached to the shared "nifi-net" network. Not part of `make up`, started separately:
+#
+#   make splunk        (first start takes several minutes: amd64 image, emulated on Apple Silicon)
+#
+# UI: http://localhost:8000   login admin / ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB   search: index=nifi
+# From NiFi (same ports as the splunk-sim stub, host "splunk"):
+#   TCP input  splunk:5514                                   (PutSplunk, newline-delimited events)
+#   HEC        http://splunk:8088/services/collector/raw     (NDJSON as sent by the labs)
+#              http://splunk:8088/services/collector/event   (HEC JSON envelope {"event": ...})
+#              header  Authorization: Splunk 00000000-0000-0000-0000-000000000000
+# Index, inputs, sourcetype: apps/nifi_playground (mounted as a Splunk app; read-write because the image
+# chowns everything under /opt/splunk on start; UI edits land in its local/, ignored by git)
+
+services:
+  splunk:
+    image: splunk/splunk:latest
+    platform: linux/amd64   # no arm64 image; Docker Desktop runs it under Rosetta
+    container_name: splunk
+    hostname: splunk
+    restart: unless-stopped
+    ports:
+      - "8000:8000"   # web UI
+      - "8088:8088"   # HEC (also reachable from the host for curl tests)
+    environment:
+      # License acceptance (Splunk General Terms + license), required to start
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com
+      SPLUNK_PASSWORD: ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB
+      # HEC over plain HTTP like splunk-sim (the image's HEC settings win over the app's defaults)
+      SPLUNK_HEC_SSL: "false"
+    volumes:
+      - ./apps/nifi_playground:/opt/splunk/etc/apps/nifi_playground
+      - splunk_etc:/opt/splunk/etc
+      - splunk_var:/opt/splunk/var
+    networks:
+      - nifi-net
+
+volumes:
+  splunk_etc:
+  splunk_var:
+
+networks:
+  nifi-net:
+    external: true

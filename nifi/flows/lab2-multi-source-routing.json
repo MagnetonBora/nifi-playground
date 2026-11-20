@@ -1,0 +1,1131 @@
+{
+  "flowContents": {
+    "identifier": "1b953da4-b598-5363-865a-6300ce42781b",
+    "name": "Lab 2 - Multi-source routing",
+    "comments": "Files + HTTP + generator -> attribute-based routing. HTTP: curl -X POST -H 'Content-Type: application/json' -d '{\"id\":1}' http://localhost:8081/events",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "processGroups": [
+      {
+        "identifier": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+        "name": "ingest",
+        "comments": "Three sources, each with a source attribute",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "processGroups": [],
+        "remoteProcessGroups": [],
+        "processors": [
+          {
+            "identifier": "bad4d80c-434f-568c-a1ed-d1f26033fcf4",
+            "name": "ListFile",
+            "comments": "Watches #{ingest.dir} (on the host: nifi/data/in)",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "type": "org.apache.nifi.processors.standard.ListFile",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Input Directory": "#{ingest.dir}",
+              "File Filter": ".*\\.(json|csv)",
+              "Listing Strategy": "timestamps"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "10 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "PRIMARY",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "95f1c1e7-3b7d-5505-be36-f2a10e409684",
+            "name": "FetchFile",
+            "comments": "Completion Strategy None: the file stays in place (lab mode)",
+            "position": {
+              "x": 0,
+              "y": 200
+            },
+            "type": "org.apache.nifi.processors.standard.FetchFile",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "File to Fetch": "${absolute.path}/${filename}",
+              "Completion Strategy": "None"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [
+              "failure",
+              "not.found",
+              "permission.denied"
+            ],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "6ec0083a-d3fe-533f-8c28-871d455a59f8",
+            "name": "source=file",
+            "comments": "",
+            "position": {
+              "x": 0,
+              "y": 400
+            },
+            "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-update-attribute-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "source": "file"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "ca71569c-f865-5940-9cce-bdce559f5639",
+            "name": "ListenHTTP",
+            "comments": "No TLS for the lab only; in production use an SSL Context Service. Port 8081 is exposed only for single NiFi",
+            "position": {
+              "x": 450,
+              "y": 200
+            },
+            "type": "org.apache.nifi.processors.standard.ListenHTTP",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Listening Port": "8081",
+              "Base Path": "events",
+              "HTTP Headers for Attributes": "Content-Type"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "f4514341-1c2c-5a95-bbb4-9eeaf15de22b",
+            "name": "source=http",
+            "comments": "ListenHTTP does not set mime.type itself: take it from the Content-Type header",
+            "position": {
+              "x": 450,
+              "y": 400
+            },
+            "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-update-attribute-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "source": "http",
+              "mime.type": "${'Content-Type':substringBefore(';'):trim()}"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "6858f813-7570-5caa-9424-c891324bd96f",
+            "name": "GenerateFlowFile",
+            "comments": "",
+            "position": {
+              "x": 900,
+              "y": 200
+            },
+            "type": "org.apache.nifi.processors.standard.GenerateFlowFile",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Custom Text": "{\"id\": ${random():mod(1000)}, \"type\": \"generated\", \"ts\": \"${now():format(\"yyyy-MM-dd'T'HH:mm:ss.SSSXXX\")}\"}",
+              "Mime Type": "application/json",
+              "File Size": "0B"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "30 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "PRIMARY",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "0a4a2e83-7dd9-5006-8883-d6da18ac2545",
+            "name": "source=generator",
+            "comments": "",
+            "position": {
+              "x": 900,
+              "y": 400
+            },
+            "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-update-attribute-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "source": "generator",
+              "filename": "${uuid}.json"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          }
+        ],
+        "inputPorts": [],
+        "outputPorts": [
+          {
+            "identifier": "ca2e1762-2ba1-53b2-a987-9d0dda51fcfc",
+            "name": "all-sources",
+            "position": {
+              "x": 450,
+              "y": 650
+            },
+            "type": "OUTPUT_PORT",
+            "concurrentlySchedulableTaskCount": 1,
+            "scheduledState": "ENABLED",
+            "allowRemoteAccess": false,
+            "portFunction": "STANDARD",
+            "componentType": "OUTPUT_PORT",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          }
+        ],
+        "connections": [
+          {
+            "identifier": "451c4639-66bb-59a1-92d0-9bfd187c1347",
+            "name": "",
+            "source": {
+              "id": "bad4d80c-434f-568c-a1ed-d1f26033fcf4",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "ListFile",
+              "comments": ""
+            },
+            "destination": {
+              "id": "95f1c1e7-3b7d-5505-be36-f2a10e409684",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "FetchFile",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "success"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "4e02950c-5a0e-5440-ad2d-beae10457adc",
+            "name": "",
+            "source": {
+              "id": "95f1c1e7-3b7d-5505-be36-f2a10e409684",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "FetchFile",
+              "comments": ""
+            },
+            "destination": {
+              "id": "6ec0083a-d3fe-533f-8c28-871d455a59f8",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "source=file",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "success"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "4cf11dcf-7084-50d6-b526-39dbbfc10895",
+            "name": "",
+            "source": {
+              "id": "ca71569c-f865-5940-9cce-bdce559f5639",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "ListenHTTP",
+              "comments": ""
+            },
+            "destination": {
+              "id": "f4514341-1c2c-5a95-bbb4-9eeaf15de22b",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "source=http",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "success"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "e80548aa-a443-58c9-ad81-92b492c54d02",
+            "name": "",
+            "source": {
+              "id": "6858f813-7570-5caa-9424-c891324bd96f",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "GenerateFlowFile",
+              "comments": ""
+            },
+            "destination": {
+              "id": "0a4a2e83-7dd9-5006-8883-d6da18ac2545",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "source=generator",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "success"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "fcbda189-fcb6-5d42-88db-eebdf498479a",
+            "name": "",
+            "source": {
+              "id": "6ec0083a-d3fe-533f-8c28-871d455a59f8",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "source=file",
+              "comments": ""
+            },
+            "destination": {
+              "id": "ca2e1762-2ba1-53b2-a987-9d0dda51fcfc",
+              "type": "OUTPUT_PORT",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "all-sources",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "success"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "e94349f9-7efa-572a-9a67-3cdf638f176f",
+            "name": "",
+            "source": {
+              "id": "f4514341-1c2c-5a95-bbb4-9eeaf15de22b",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "source=http",
+              "comments": ""
+            },
+            "destination": {
+              "id": "ca2e1762-2ba1-53b2-a987-9d0dda51fcfc",
+              "type": "OUTPUT_PORT",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "all-sources",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "success"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          },
+          {
+            "identifier": "8b033389-e169-5b60-9cd0-eb9454550ced",
+            "name": "",
+            "source": {
+              "id": "0a4a2e83-7dd9-5006-8883-d6da18ac2545",
+              "type": "PROCESSOR",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "source=generator",
+              "comments": ""
+            },
+            "destination": {
+              "id": "ca2e1762-2ba1-53b2-a987-9d0dda51fcfc",
+              "type": "OUTPUT_PORT",
+              "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+              "name": "all-sources",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "success"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "b52cb45a-7527-51ce-be17-40e1d8826d20"
+          }
+        ],
+        "labels": [],
+        "funnels": [],
+        "controllerServices": [],
+        "defaultFlowFileExpiration": "0 sec",
+        "defaultBackPressureObjectThreshold": 10000,
+        "defaultBackPressureDataSizeThreshold": "1 GB",
+        "scheduledState": "ENABLED",
+        "executionEngine": "INHERITED",
+        "maxConcurrentTasks": 1,
+        "statelessFlowTimeout": "1 min",
+        "flowFileConcurrency": "UNBOUNDED",
+        "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+        "componentType": "PROCESS_GROUP",
+        "parameterContextName": "lab2-params",
+        "groupIdentifier": "1b953da4-b598-5363-865a-6300ce42781b"
+      },
+      {
+        "identifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db",
+        "name": "route",
+        "comments": "RouteOnAttribute: json / csv / unmatched",
+        "position": {
+          "x": 0,
+          "y": 400
+        },
+        "processGroups": [
+          {
+            "identifier": "041e9375-c818-5327-bd81-32f4644f9c24",
+            "name": "process_json",
+            "comments": "JSON processing (placeholder)",
+            "position": {
+              "x": 0,
+              "y": 450
+            },
+            "processGroups": [],
+            "remoteProcessGroups": [],
+            "processors": [
+              {
+                "identifier": "5228bbcd-78ed-56d9-b7f3-d0b38c3f94a1",
+                "name": "LogAttribute (json)",
+                "comments": "",
+                "position": {
+                  "x": 0,
+                  "y": 200
+                },
+                "type": "org.apache.nifi.processors.standard.LogAttribute",
+                "bundle": {
+                  "group": "org.apache.nifi",
+                  "artifact": "nifi-standard-nar",
+                  "version": "2.12.0"
+                },
+                "properties": {
+                  "Log Level": "info",
+                  "Log Payload": "true"
+                },
+                "propertyDescriptors": {},
+                "style": {},
+                "schedulingPeriod": "0 sec",
+                "schedulingStrategy": "TIMER_DRIVEN",
+                "executionNode": "ALL",
+                "penaltyDuration": "30 sec",
+                "yieldDuration": "1 sec",
+                "bulletinLevel": "WARN",
+                "runDurationMillis": 0,
+                "concurrentlySchedulableTaskCount": 1,
+                "autoTerminatedRelationships": [
+                  "success"
+                ],
+                "scheduledState": "ENABLED",
+                "retryCount": 10,
+                "retriedRelationships": [],
+                "backoffMechanism": "PENALIZE_FLOWFILE",
+                "maxBackoffPeriod": "10 mins",
+                "componentType": "PROCESSOR",
+                "groupIdentifier": "041e9375-c818-5327-bd81-32f4644f9c24"
+              }
+            ],
+            "inputPorts": [
+              {
+                "identifier": "4a7937b7-c29d-537b-a441-c7f09677995d",
+                "name": "json-in",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "type": "INPUT_PORT",
+                "concurrentlySchedulableTaskCount": 1,
+                "scheduledState": "ENABLED",
+                "allowRemoteAccess": false,
+                "portFunction": "STANDARD",
+                "componentType": "INPUT_PORT",
+                "groupIdentifier": "041e9375-c818-5327-bd81-32f4644f9c24"
+              }
+            ],
+            "outputPorts": [],
+            "connections": [
+              {
+                "identifier": "4cd7625f-a046-5ec2-9494-c228ea88eb6a",
+                "name": "",
+                "source": {
+                  "id": "4a7937b7-c29d-537b-a441-c7f09677995d",
+                  "type": "INPUT_PORT",
+                  "groupId": "041e9375-c818-5327-bd81-32f4644f9c24",
+                  "name": "json-in",
+                  "comments": ""
+                },
+                "destination": {
+                  "id": "5228bbcd-78ed-56d9-b7f3-d0b38c3f94a1",
+                  "type": "PROCESSOR",
+                  "groupId": "041e9375-c818-5327-bd81-32f4644f9c24",
+                  "name": "LogAttribute (json)",
+                  "comments": ""
+                },
+                "labelIndex": 1,
+                "zIndex": 0,
+                "selectedRelationships": [],
+                "backPressureObjectThreshold": 10000,
+                "backPressureDataSizeThreshold": "1 GB",
+                "flowFileExpiration": "0 sec",
+                "prioritizers": [],
+                "bends": [],
+                "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+                "partitioningAttribute": "",
+                "loadBalanceCompression": "DO_NOT_COMPRESS",
+                "componentType": "CONNECTION",
+                "groupIdentifier": "041e9375-c818-5327-bd81-32f4644f9c24"
+              }
+            ],
+            "labels": [],
+            "funnels": [],
+            "controllerServices": [],
+            "defaultFlowFileExpiration": "0 sec",
+            "defaultBackPressureObjectThreshold": 10000,
+            "defaultBackPressureDataSizeThreshold": "1 GB",
+            "scheduledState": "ENABLED",
+            "executionEngine": "INHERITED",
+            "maxConcurrentTasks": 1,
+            "statelessFlowTimeout": "1 min",
+            "flowFileConcurrency": "UNBOUNDED",
+            "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+            "componentType": "PROCESS_GROUP",
+            "parameterContextName": "lab2-params",
+            "groupIdentifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db"
+          },
+          {
+            "identifier": "47bc3520-7b42-5cdb-aadd-e00c4e9b049e",
+            "name": "process_csv",
+            "comments": "CSV processing (placeholder)",
+            "position": {
+              "x": 450,
+              "y": 450
+            },
+            "processGroups": [],
+            "remoteProcessGroups": [],
+            "processors": [
+              {
+                "identifier": "251c12f2-0cf4-5313-9b3f-f2ea7e4b9e9b",
+                "name": "LogAttribute (csv)",
+                "comments": "",
+                "position": {
+                  "x": 0,
+                  "y": 200
+                },
+                "type": "org.apache.nifi.processors.standard.LogAttribute",
+                "bundle": {
+                  "group": "org.apache.nifi",
+                  "artifact": "nifi-standard-nar",
+                  "version": "2.12.0"
+                },
+                "properties": {
+                  "Log Level": "info",
+                  "Log Payload": "true"
+                },
+                "propertyDescriptors": {},
+                "style": {},
+                "schedulingPeriod": "0 sec",
+                "schedulingStrategy": "TIMER_DRIVEN",
+                "executionNode": "ALL",
+                "penaltyDuration": "30 sec",
+                "yieldDuration": "1 sec",
+                "bulletinLevel": "WARN",
+                "runDurationMillis": 0,
+                "concurrentlySchedulableTaskCount": 1,
+                "autoTerminatedRelationships": [
+                  "success"
+                ],
+                "scheduledState": "ENABLED",
+                "retryCount": 10,
+                "retriedRelationships": [],
+                "backoffMechanism": "PENALIZE_FLOWFILE",
+                "maxBackoffPeriod": "10 mins",
+                "componentType": "PROCESSOR",
+                "groupIdentifier": "47bc3520-7b42-5cdb-aadd-e00c4e9b049e"
+              }
+            ],
+            "inputPorts": [
+              {
+                "identifier": "183965cf-0e5e-5f0b-9e73-1490a6fecada",
+                "name": "csv-in",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "type": "INPUT_PORT",
+                "concurrentlySchedulableTaskCount": 1,
+                "scheduledState": "ENABLED",
+                "allowRemoteAccess": false,
+                "portFunction": "STANDARD",
+                "componentType": "INPUT_PORT",
+                "groupIdentifier": "47bc3520-7b42-5cdb-aadd-e00c4e9b049e"
+              }
+            ],
+            "outputPorts": [],
+            "connections": [
+              {
+                "identifier": "d0fc3962-17b8-5472-ab61-981be5f20339",
+                "name": "",
+                "source": {
+                  "id": "183965cf-0e5e-5f0b-9e73-1490a6fecada",
+                  "type": "INPUT_PORT",
+                  "groupId": "47bc3520-7b42-5cdb-aadd-e00c4e9b049e",
+                  "name": "csv-in",
+                  "comments": ""
+                },
+                "destination": {
+                  "id": "251c12f2-0cf4-5313-9b3f-f2ea7e4b9e9b",
+                  "type": "PROCESSOR",
+                  "groupId": "47bc3520-7b42-5cdb-aadd-e00c4e9b049e",
+                  "name": "LogAttribute (csv)",
+                  "comments": ""
+                },
+                "labelIndex": 1,
+                "zIndex": 0,
+                "selectedRelationships": [],
+                "backPressureObjectThreshold": 10000,
+                "backPressureDataSizeThreshold": "1 GB",
+                "flowFileExpiration": "0 sec",
+                "prioritizers": [],
+                "bends": [],
+                "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+                "partitioningAttribute": "",
+                "loadBalanceCompression": "DO_NOT_COMPRESS",
+                "componentType": "CONNECTION",
+                "groupIdentifier": "47bc3520-7b42-5cdb-aadd-e00c4e9b049e"
+              }
+            ],
+            "labels": [],
+            "funnels": [],
+            "controllerServices": [],
+            "defaultFlowFileExpiration": "0 sec",
+            "defaultBackPressureObjectThreshold": 10000,
+            "defaultBackPressureDataSizeThreshold": "1 GB",
+            "scheduledState": "ENABLED",
+            "executionEngine": "INHERITED",
+            "maxConcurrentTasks": 1,
+            "statelessFlowTimeout": "1 min",
+            "flowFileConcurrency": "UNBOUNDED",
+            "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+            "componentType": "PROCESS_GROUP",
+            "parameterContextName": "lab2-params",
+            "groupIdentifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db"
+          }
+        ],
+        "remoteProcessGroups": [],
+        "processors": [
+          {
+            "identifier": "a78f504a-810c-5cdb-ae26-293c99ee5aa4",
+            "name": "RouteOnAttribute",
+            "comments": "",
+            "position": {
+              "x": 400,
+              "y": 200
+            },
+            "type": "org.apache.nifi.processors.standard.RouteOnAttribute",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Routing Strategy": "Route to Property name",
+              "json": "${mime.type:equals('application/json'):or(${filename:endsWith('.json')})}",
+              "csv": "${filename:endsWith('.csv')}"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db"
+          },
+          {
+            "identifier": "8b9aa76a-f851-5037-ac9a-f97ece7abf06",
+            "name": "PutFile (quarantine)",
+            "comments": "",
+            "position": {
+              "x": 900,
+              "y": 450
+            },
+            "type": "org.apache.nifi.processors.standard.PutFile",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-nar",
+              "version": "2.12.0"
+            },
+            "properties": {
+              "Directory": "#{quarantine.dir}",
+              "Conflict Resolution Strategy": "replace"
+            },
+            "propertyDescriptors": {},
+            "style": {},
+            "schedulingPeriod": "0 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "executionNode": "ALL",
+            "penaltyDuration": "30 sec",
+            "yieldDuration": "1 sec",
+            "bulletinLevel": "WARN",
+            "runDurationMillis": 0,
+            "concurrentlySchedulableTaskCount": 1,
+            "autoTerminatedRelationships": [
+              "success",
+              "failure"
+            ],
+            "scheduledState": "ENABLED",
+            "retryCount": 10,
+            "retriedRelationships": [],
+            "backoffMechanism": "PENALIZE_FLOWFILE",
+            "maxBackoffPeriod": "10 mins",
+            "componentType": "PROCESSOR",
+            "groupIdentifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db"
+          }
+        ],
+        "inputPorts": [
+          {
+            "identifier": "a02ab6db-280d-508b-a8bd-0590c13a298e",
+            "name": "from-ingest",
+            "position": {
+              "x": 450,
+              "y": 0
+            },
+            "type": "INPUT_PORT",
+            "concurrentlySchedulableTaskCount": 1,
+            "scheduledState": "ENABLED",
+            "allowRemoteAccess": false,
+            "portFunction": "STANDARD",
+            "componentType": "INPUT_PORT",
+            "groupIdentifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db"
+          }
+        ],
+        "outputPorts": [],
+        "connections": [
+          {
+            "identifier": "16802aec-49ae-5f89-9d37-77172b928161",
+            "name": "",
+            "source": {
+              "id": "a02ab6db-280d-508b-a8bd-0590c13a298e",
+              "type": "INPUT_PORT",
+              "groupId": "fbeb47f1-9409-57cf-b80d-7406a43ba8db",
+              "name": "from-ingest",
+              "comments": ""
+            },
+            "destination": {
+              "id": "a78f504a-810c-5cdb-ae26-293c99ee5aa4",
+              "type": "PROCESSOR",
+              "groupId": "fbeb47f1-9409-57cf-b80d-7406a43ba8db",
+              "name": "RouteOnAttribute",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db"
+          },
+          {
+            "identifier": "ee3df76c-b930-59ba-b4a8-e0ad783c91f7",
+            "name": "",
+            "source": {
+              "id": "a78f504a-810c-5cdb-ae26-293c99ee5aa4",
+              "type": "PROCESSOR",
+              "groupId": "fbeb47f1-9409-57cf-b80d-7406a43ba8db",
+              "name": "RouteOnAttribute",
+              "comments": ""
+            },
+            "destination": {
+              "id": "4a7937b7-c29d-537b-a441-c7f09677995d",
+              "type": "INPUT_PORT",
+              "groupId": "041e9375-c818-5327-bd81-32f4644f9c24",
+              "name": "json-in",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "json"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db"
+          },
+          {
+            "identifier": "2c1be22a-f4cb-5032-bb7d-c32e00ec1c10",
+            "name": "",
+            "source": {
+              "id": "a78f504a-810c-5cdb-ae26-293c99ee5aa4",
+              "type": "PROCESSOR",
+              "groupId": "fbeb47f1-9409-57cf-b80d-7406a43ba8db",
+              "name": "RouteOnAttribute",
+              "comments": ""
+            },
+            "destination": {
+              "id": "183965cf-0e5e-5f0b-9e73-1490a6fecada",
+              "type": "INPUT_PORT",
+              "groupId": "47bc3520-7b42-5cdb-aadd-e00c4e9b049e",
+              "name": "csv-in",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "csv"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db"
+          },
+          {
+            "identifier": "3f29f44f-34a4-5b92-b4b5-149c36506038",
+            "name": "",
+            "source": {
+              "id": "a78f504a-810c-5cdb-ae26-293c99ee5aa4",
+              "type": "PROCESSOR",
+              "groupId": "fbeb47f1-9409-57cf-b80d-7406a43ba8db",
+              "name": "RouteOnAttribute",
+              "comments": ""
+            },
+            "destination": {
+              "id": "8b9aa76a-f851-5037-ac9a-f97ece7abf06",
+              "type": "PROCESSOR",
+              "groupId": "fbeb47f1-9409-57cf-b80d-7406a43ba8db",
+              "name": "PutFile (quarantine)",
+              "comments": ""
+            },
+            "labelIndex": 1,
+            "zIndex": 0,
+            "selectedRelationships": [
+              "unmatched"
+            ],
+            "backPressureObjectThreshold": 10000,
+            "backPressureDataSizeThreshold": "1 GB",
+            "flowFileExpiration": "0 sec",
+            "prioritizers": [],
+            "bends": [],
+            "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+            "partitioningAttribute": "",
+            "loadBalanceCompression": "DO_NOT_COMPRESS",
+            "componentType": "CONNECTION",
+            "groupIdentifier": "fbeb47f1-9409-57cf-b80d-7406a43ba8db"
+          }
+        ],
+        "labels": [],
+        "funnels": [],
+        "controllerServices": [],
+        "defaultFlowFileExpiration": "0 sec",
+        "defaultBackPressureObjectThreshold": 10000,
+        "defaultBackPressureDataSizeThreshold": "1 GB",
+        "scheduledState": "ENABLED",
+        "executionEngine": "INHERITED",
+        "maxConcurrentTasks": 1,
+        "statelessFlowTimeout": "1 min",
+        "flowFileConcurrency": "UNBOUNDED",
+        "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+        "componentType": "PROCESS_GROUP",
+        "parameterContextName": "lab2-params",
+        "groupIdentifier": "1b953da4-b598-5363-865a-6300ce42781b"
+      }
+    ],
+    "remoteProcessGroups": [],
+    "processors": [],
+    "inputPorts": [],
+    "outputPorts": [],
+    "connections": [
+      {
+        "identifier": "a55695bf-8400-5504-8b01-ad79a832a6e2",
+        "name": "all-sources -> route",
+        "source": {
+          "id": "ca2e1762-2ba1-53b2-a987-9d0dda51fcfc",
+          "type": "OUTPUT_PORT",
+          "groupId": "b52cb45a-7527-51ce-be17-40e1d8826d20",
+          "name": "all-sources",
+          "comments": ""
+        },
+        "destination": {
+          "id": "a02ab6db-280d-508b-a8bd-0590c13a298e",
+          "type": "INPUT_PORT",
+          "groupId": "fbeb47f1-9409-57cf-b80d-7406a43ba8db",
+          "name": "from-ingest",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [
+          "org.apache.nifi.prioritizer.NewestFlowFileFirstPrioritizer"
+        ],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "1b953da4-b598-5363-865a-6300ce42781b"
+      }
+    ],
+    "labels": [],
+    "funnels": [],
+    "controllerServices": [],
+    "defaultFlowFileExpiration": "0 sec",
+    "defaultBackPressureObjectThreshold": 10000,
+    "defaultBackPressureDataSizeThreshold": "1 GB",
+    "scheduledState": "ENABLED",
+    "executionEngine": "INHERITED",
+    "maxConcurrentTasks": 1,
+    "statelessFlowTimeout": "1 min",
+    "flowFileConcurrency": "UNBOUNDED",
+    "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+    "componentType": "PROCESS_GROUP",
+    "parameterContextName": "lab2-params"
+  },
+  "externalControllerServices": {},
+  "parameterContexts": {
+    "lab2-params": {
+      "name": "lab2-params",
+      "description": "Lab 2: directories for the file source",
+      "parameters": [
+        {
+          "name": "ingest.dir",
+          "value": "/opt/nifi/data/in",
+          "description": "Directory read by ListFile (on the host: nifi/data/in)",
+          "sensitive": false,
+          "provided": false
+        },
+        {
+          "name": "quarantine.dir",
+          "value": "/opt/nifi/data/quarantine",
+          "description": "Where PutFile writes unmatched (on the host: nifi/data/quarantine)",
+          "sensitive": false,
+          "provided": false
+        }
+      ],
+      "inheritedParameterContexts": [],
+      "componentType": "PARAMETER_CONTEXT"
+    }
+  },
+  "flowEncodingVersion": "1.0",
+  "parameterProviders": {},
+  "latest": false
+}

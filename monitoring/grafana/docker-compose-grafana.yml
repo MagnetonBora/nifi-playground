@@ -1,0 +1,27 @@
+# Grafana, attached to the shared "nifi-net" network
+#
+#   make grafana         (or: make monitoring = prometheus + grafana)
+#
+# Grafana: http://localhost:3000  (admin / admin on first login)
+# The Prometheus datasource (http://prometheus:9090) is provisioned from ./provisioning.
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3000:3000"
+    networks:
+      - nifi-net
+
+volumes:
+  grafana_data:
+
+networks:
+  # Shared with the other compose files (make network)
+  nifi-net:
+    external: true

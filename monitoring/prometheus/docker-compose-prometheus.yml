@@ -1,0 +1,63 @@
+# Prometheus + kafka-exporter, attached to the shared "nifi-net" network
+#
+#   make prometheus      (or: make monitoring = prometheus + grafana)
+#
+# Prometheus: http://localhost:9090   scrape config: prometheus.yml
+# NiFi is scraped over mTLS with the client certificate CN=prometheus from the shared CA (nifi/certs);
+# NiFi grants it read access to /flow via `make policies-nifi` / `make policies-cluster`.
+
+x-cert-pass: &cert-pass "changeMeCertPassword"
+
+services:
+  # One-shot job: shared CA + Prometheus client certificate in nifi/certs
+  # (idempotent, same job as in the NiFi compose files)
+  prometheus-certs:
+    image: apache/nifi:2.12.0
+    container_name: prometheus-certs-init
+    labels:
+      playground.role: init   # removed after start by `make` (clean-init)
+    user: root
+    entrypoint: ["sh", "/nifi-common/generate-certs.sh"]
+    environment:
+      CERT_PASSWORD: *cert-pass
+    volumes:
+      - ../../nifi/common:/nifi-common:ro
+      - ../../nifi/certs:/certs
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    container_name: kafka-exporter
+    # Exits if Kafka is not reachable yet, so keep restarting until it is
+    restart: unless-stopped
+    command: ["--kafka.server=kafka1:19092"]
+    networks:
+      - nifi-net
+    ports:
+      - 9308:9308
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+      # Client certificate for NiFi (mTLS) and the CA that signed the NiFi server certificates
+      - ../../nifi/certs/ca.crt:/etc/prometheus/certs/ca.crt:ro
+      - ../../nifi/certs/prometheus.crt:/etc/prometheus/certs/prometheus.crt:ro
+      - ../../nifi/certs/prometheus.key:/etc/prometheus/certs/prometheus.key:ro
+    depends_on:
+      prometheus-certs:
+        condition: service_completed_successfully
+    ports:
+      - "9090:9090"
+    networks:
+      - nifi-net
+
+volumes:
+  prometheus_data:
+
+networks:
+  # Shared with the other compose files (make network)
+  nifi-net:
+    external: true

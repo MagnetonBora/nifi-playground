@@ -1,0 +1,135 @@
+# Single-node NiFi 2.12.0  (nifi/single)
+#
+#   make nifi        (starts NiFi and grants policies, see Makefile)
+#
+# UI: https://localhost:8443/nifi   login admin / ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB
+# TLS certificate from the shared CA in nifi/certs (same as the cluster), authorization via
+# managed-authorizer, so other identities (e.g. Prometheus, CN=prometheus) can get policies.
+
+x-cert-pass: &cert-pass "changeMeCertPassword"
+
+services:
+  # One-shot job: shared CA, NiFi keystores, truststore and the Prometheus client cert in nifi/certs
+  # (idempotent, same job as in nifi/cluster and monitoring)
+  nifi-certs:
+    image: apache/nifi:2.12.0
+    container_name: nifi-certs-init
+    labels:
+      playground.role: init   # removed after start by `make` (clean-init)
+    user: root
+    entrypoint: ["sh", "/nifi-common/generate-certs.sh"]
+    environment:
+      CERT_PASSWORD: *cert-pass
+    volumes:
+      - ../common:/nifi-common:ro
+      - ../certs:/certs
+
+  nifi:
+    image: apache/nifi:2.12.0
+    container_name: nifi
+    hostname: nifi
+    restart: unless-stopped
+    ports:
+      - "8443:8443"
+      - "8081:8081"   # ListenHTTP in Lab 2 (curl http://localhost:8081/events)
+    # Only nifi-net: with two networks the hostname resolves to two IPs and NiFi binds just one of them
+    networks:
+      - nifi-net
+    # 1. Install authorizers.xml (admin + prometheus identities, managed-authorizer)
+    # 2. First start only: seed an empty flow with a fixed root group id
+    # 3. Run the stock start script
+    entrypoint:
+      - sh
+      - -c
+      - |
+        cd /opt/nifi/nifi-current/conf
+        cp /nifi-conf/authorizers.xml authorizers.xml
+        [ -f flow.json.gz ] || gzip -c /nifi-common/flow.json > flow.json.gz
+        exec /opt/nifi/scripts/start.sh
+    depends_on:
+      nifi-certs:
+        condition: service_completed_successfully
+    environment:
+      NIFI_WEB_HTTPS_PORT: "8443"
+      NIFI_WEB_PROXY_HOST: "localhost:8443"
+      # TLS with certificates from the shared CA in nifi/certs (see nifi/common/generate-certs.sh)
+      AUTH: tls
+      KEYSTORE_PATH: /certs/nifi.p12
+      KEYSTORE_TYPE: PKCS12
+      KEYSTORE_PASSWORD: *cert-pass
+      TRUSTSTORE_PATH: /certs/truststore.p12
+      TRUSTSTORE_TYPE: PKCS12
+      TRUSTSTORE_PASSWORD: *cert-pass
+      # Username/password login (password must be at least 12 characters), managed-authorizer
+      NIFI_SECURITY_USER_LOGIN_IDENTITY_PROVIDER: single-user-provider
+      NIFI_SECURITY_USER_AUTHORIZER: managed-authorizer
+      SINGLE_USER_CREDENTIALS_USERNAME: &admin-user admin
+      SINGLE_USER_CREDENTIALS_PASSWORD: &admin-pass ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB
+      NIFI_SENSITIVE_PROPS_KEY: "changeMeSensitivePropsKey"
+      NIFI_JVM_HEAP_INIT: 1g
+      NIFI_JVM_HEAP_MAX: 2g
+    volumes:
+      - ./authorizers.xml:/nifi-conf/authorizers.xml:ro
+      - ../common:/nifi-common:ro
+      - ../certs:/certs:ro
+      - nifi_conf:/opt/nifi/nifi-current/conf
+      - nifi_database:/opt/nifi/nifi-current/database_repository
+      - nifi_flowfile:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_content:/opt/nifi/nifi-current/content_repository
+      - nifi_provenance:/opt/nifi/nifi-current/provenance_repository
+      - nifi_state:/opt/nifi/nifi-current/state
+      - nifi_logs:/opt/nifi/nifi-current/logs
+      - ../data:/opt/nifi/data
+      - ../drivers:/opt/nifi/drivers:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -kfs https://$$(hostname):8443/nifi/ > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  # Tool (not started by `up`): waits for NiFi, then grants admin / prometheus policies.
+  # Idempotent. Run: make policies-nifi
+  #   (= docker compose -p nifi-playground -f <this file> run --rm nifi-policies)
+  nifi-policies:
+    image: apache/nifi:2.12.0
+    profiles: ["tools"]
+    entrypoint: ["python3", "/nifi-common/nifi-policies.py", "https://nifi:8443"]
+    environment:
+      NIFI_USERNAME: *admin-user
+      NIFI_PASSWORD: *admin-pass
+    volumes:
+      - ../common:/nifi-common:ro
+      - ../certs/ca.crt:/certs/ca.crt:ro
+    networks:
+      - nifi-net
+
+  # Tool (not started by `up`): imports flow definitions from nifi/flows as new Process Groups.
+  # Run: make import f=nifi/flows/<file>.json
+  nifi-import:
+    image: apache/nifi:2.12.0
+    profiles: ["tools"]
+    entrypoint: ["python3", "/nifi-common/nifi-import.py", "https://nifi:8443"]
+    environment:
+      NIFI_USERNAME: *admin-user
+      NIFI_PASSWORD: *admin-pass
+    volumes:
+      - ../common:/nifi-common:ro
+      - ../certs/ca.crt:/certs/ca.crt:ro
+      - ../flows:/flows:ro
+    networks:
+      - nifi-net
+
+networks:
+  # Shared with the registry / postgres / kafka / monitoring compose files (make network)
+  nifi-net:
+    external: true
+
+volumes:
+  nifi_conf:
+  nifi_database:
+  nifi_flowfile:
+  nifi_content:
+  nifi_provenance:
+  nifi_state:
+  nifi_logs:

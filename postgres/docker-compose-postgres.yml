@@ -1,0 +1,69 @@
+# PostgreSQL for NiFi experiments, attached to the shared "nifi-net" network
+#
+#   make postgres
+#
+# From NiFi (DBCPConnectionPool):
+#   URL:    jdbc:postgresql://postgres:5432/nifi
+#   Driver: org.postgresql.Driver, /opt/nifi/drivers/postgresql-42.7.14.jar  (nifi/drivers)
+#   User:   nifi / nifi
+# From the host: localhost:5432
+#
+# pgAdmin: http://localhost:5050   login admin@example.com / CHANGE_ME_TO_A_STRONG_PASSWORD
+#   Server "nifi-playground" (postgres:5432, user nifi) is pre-registered from pgadmin/servers.json
+#   (on first start of the pgadmin_data volume); the DB password (nifi) is asked on first connect.
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: nifi-postgres
+    hostname: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: nifi
+      POSTGRES_USER: nifi
+      POSTGRES_PASSWORD: nifi
+    volumes:
+      # Postgres 18+ keeps data under /var/lib/postgresql/<major>/docker
+      - pg_data:/var/lib/postgresql
+      # Lab tables, applied on a fresh database only (existing DB: make lab-setup)
+      - ./init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - nifi-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nifi -d nifi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:5050:80"
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: CHANGE_ME_TO_A_STRONG_PASSWORD
+
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      # Pre-registered connection to the playground Postgres (read on first start only)
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+
+    # Same network as Postgres, so the server is reachable as postgres:5432
+    networks:
+      - nifi-net
+    depends_on:
+      - postgres
+
+volumes:
+  pg_data:
+  pgadmin_data:
+
+networks:
+  nifi-net:
+    external: true

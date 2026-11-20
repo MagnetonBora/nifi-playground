@@ -1,0 +1,220 @@
+{
+  "flowContents": {
+    "identifier": "d6c6e759-34f4-5a9b-b31a-921da9557c3b",
+    "name": "Lab 1 - First flow",
+    "comments": "GenerateFlowFile -> UpdateAttribute -> LogAttribute. Check queue statistics, provenance and the Content Viewer.",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "processGroups": [],
+    "remoteProcessGroups": [],
+    "processors": [
+      {
+        "identifier": "f7233c58-0264-5d61-abfe-1129d897fb98",
+        "name": "GenerateFlowFile",
+        "comments": "JSON event every 5 seconds. Date format is in double quotes: the format('...\\'T\\'...') variant is not evaluated in NiFi 2.12",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "type": "org.apache.nifi.processors.standard.GenerateFlowFile",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "File Size": "0B",
+          "Batch Size": "1",
+          "Data Format": "Text",
+          "Unique FlowFiles": "false",
+          "Custom Text": "{\"id\": ${random():mod(1000)}, \"ts\": \"${now():format(\"yyyy-MM-dd'T'HH:mm:ss.SSSXXX\")}\"}",
+          "Character Set": "UTF-8",
+          "Mime Type": "application/json"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "5 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "PRIMARY",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "d6c6e759-34f4-5a9b-b31a-921da9557c3b"
+      },
+      {
+        "identifier": "b80a3279-449f-5360-8e88-e4a994231004",
+        "name": "UpdateAttribute",
+        "comments": "Adds the lab.stage and event.id attributes",
+        "position": {
+          "x": 0,
+          "y": 250
+        },
+        "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-update-attribute-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "lab.stage": "ingested",
+          "event.id": "${UUID()}"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "d6c6e759-34f4-5a9b-b31a-921da9557c3b"
+      },
+      {
+        "identifier": "894db29e-363a-5b6b-906e-61867fdf0e65",
+        "name": "LogAttribute",
+        "comments": "Writes attributes to nifi-app.log (make logs s=nifi)",
+        "position": {
+          "x": 0,
+          "y": 500
+        },
+        "type": "org.apache.nifi.processors.standard.LogAttribute",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Log Level": "info"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [
+          "success"
+        ],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "d6c6e759-34f4-5a9b-b31a-921da9557c3b"
+      }
+    ],
+    "inputPorts": [],
+    "outputPorts": [],
+    "connections": [
+      {
+        "identifier": "03fca0b3-747e-51be-94dd-7945b98e0ff2",
+        "name": "",
+        "source": {
+          "id": "f7233c58-0264-5d61-abfe-1129d897fb98",
+          "type": "PROCESSOR",
+          "groupId": "d6c6e759-34f4-5a9b-b31a-921da9557c3b",
+          "name": "GenerateFlowFile",
+          "comments": ""
+        },
+        "destination": {
+          "id": "b80a3279-449f-5360-8e88-e4a994231004",
+          "type": "PROCESSOR",
+          "groupId": "d6c6e759-34f4-5a9b-b31a-921da9557c3b",
+          "name": "UpdateAttribute",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [
+          "success"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "d6c6e759-34f4-5a9b-b31a-921da9557c3b"
+      },
+      {
+        "identifier": "a0e655b7-efd1-55f5-b466-03e1d412cae5",
+        "name": "",
+        "source": {
+          "id": "b80a3279-449f-5360-8e88-e4a994231004",
+          "type": "PROCESSOR",
+          "groupId": "d6c6e759-34f4-5a9b-b31a-921da9557c3b",
+          "name": "UpdateAttribute",
+          "comments": ""
+        },
+        "destination": {
+          "id": "894db29e-363a-5b6b-906e-61867fdf0e65",
+          "type": "PROCESSOR",
+          "groupId": "d6c6e759-34f4-5a9b-b31a-921da9557c3b",
+          "name": "LogAttribute",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [
+          "success"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "d6c6e759-34f4-5a9b-b31a-921da9557c3b"
+      }
+    ],
+    "labels": [],
+    "funnels": [],
+    "controllerServices": [],
+    "defaultFlowFileExpiration": "0 sec",
+    "defaultBackPressureObjectThreshold": 10000,
+    "defaultBackPressureDataSizeThreshold": "1 GB",
+    "scheduledState": "ENABLED",
+    "executionEngine": "INHERITED",
+    "maxConcurrentTasks": 1,
+    "statelessFlowTimeout": "1 min",
+    "flowFileConcurrency": "UNBOUNDED",
+    "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+    "componentType": "PROCESS_GROUP"
+  },
+  "externalControllerServices": {},
+  "parameterContexts": {},
+  "flowEncodingVersion": "1.0",
+  "parameterProviders": {},
+  "latest": false
+}

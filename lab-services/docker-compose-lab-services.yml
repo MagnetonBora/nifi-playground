@@ -1,0 +1,52 @@
+# Stub endpoints for the workshop labs, attached to the shared "nifi-net" network
+#
+#   make lab-services
+#
+# From NiFi:
+#   customers-api  http://customers-api:8000/customers/<id>        (Lab 4, RestLookupService)   customers_api.py
+#   splunk-sim     tcp splunk-sim:5514, http://splunk-sim:8088/... (Lab 6, final lab)            splunk_sim.py
+#   flaky          http://flaky:9099/events                        (Lab 7, 60% 200 / 30% 503 / 10% 400)  flaky.py
+# Shared handler code for customers_api.py and splunk_sim.py: common.py (flaky.py is standalone)
+# Received events: make lab-splunk-count   (files in the lab_splunk_data volume)
+
+x-lab-service: &lab-service
+  image: python:3.12-alpine
+  restart: unless-stopped
+  working_dir: /app
+  networks:
+    - nifi-net
+
+services:
+  customers-api:
+    <<: *lab-service
+    container_name: customers-api
+    hostname: customers-api
+    entrypoint: ["python", "-u", "/app/customers_api.py"]
+    volumes:
+      - ./common.py:/app/common.py:ro
+      - ./customers_api.py:/app/customers_api.py:ro
+
+  splunk-sim:
+    <<: *lab-service
+    container_name: splunk-sim
+    hostname: splunk-sim
+    entrypoint: ["python", "-u", "/app/splunk_sim.py"]
+    volumes:
+      - ./common.py:/app/common.py:ro
+      - ./splunk_sim.py:/app/splunk_sim.py:ro
+      - lab_splunk_data:/data
+
+  flaky:
+    <<: *lab-service
+    container_name: flaky
+    hostname: flaky
+    entrypoint: ["python", "-u", "/app/flaky.py"]
+    volumes:
+      - ./flaky.py:/app/flaky.py:ro
+
+volumes:
+  lab_splunk_data:
+
+networks:
+  nifi-net:
+    external: true

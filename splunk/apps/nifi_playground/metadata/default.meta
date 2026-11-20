@@ -1,0 +1,4 @@
+# Index, sourcetype and inputs are visible to all apps (e.g. Search & Reporting)
+[]
+access = read : [ * ], write : [ admin ]
+export = system

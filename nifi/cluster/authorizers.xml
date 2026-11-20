@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Cluster authorizer: users/policies are stored in conf/users.xml and
+  conf/authorizations.xml (generated on first start from the identities below).
+  "admin" is the single-user login; the node identities and "CN=prometheus, OU=NIFI"
+  (metrics scraper, client certificate) match the DNs produced by nifi/common/generate-certs.sh.
+  Policies for prometheus are granted by nifi/common/nifi-policies.py.
+-->
+<authorizers>
+    <userGroupProvider>
+        <identifier>file-user-group-provider</identifier>
+        <class>org.apache.nifi.authorization.FileUserGroupProvider</class>
+        <property name="Users File">./conf/users.xml</property>
+        <property name="Initial User Identity 1">admin</property>
+        <property name="Initial User Identity 2">CN=nifi1, OU=NIFI</property>
+        <property name="Initial User Identity 3">CN=nifi2, OU=NIFI</property>
+        <property name="Initial User Identity 4">CN=nifi3, OU=NIFI</property>
+        <property name="Initial User Identity 5">CN=prometheus, OU=NIFI</property>
+    </userGroupProvider>
+    <accessPolicyProvider>
+        <identifier>file-access-policy-provider</identifier>
+        <class>org.apache.nifi.authorization.FileAccessPolicyProvider</class>
+        <property name="User Group Provider">file-user-group-provider</property>
+        <property name="Authorizations File">./conf/authorizations.xml</property>
+        <property name="Initial Admin Identity">admin</property>
+        <property name="Node Identity 1">CN=nifi1, OU=NIFI</property>
+        <property name="Node Identity 2">CN=nifi2, OU=NIFI</property>
+        <property name="Node Identity 3">CN=nifi3, OU=NIFI</property>
+        <property name="Node Group"></property>
+    </accessPolicyProvider>
+    <authorizer>
+        <identifier>managed-authorizer</identifier>
+        <class>org.apache.nifi.authorization.StandardManagedAuthorizer</class>
+        <property name="Access Policy Provider">file-access-policy-provider</property>
+    </authorizer>
+</authorizers>

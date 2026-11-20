@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  NiFi Registry authorizer. Users/policies are stored in database/users.xml and
+  database/authorizations.xml (registry_database volume), generated on the first secured
+  start from the identities below; later changes: Registry UI (as admin).
+
+    - admin           = LDAP login in the Registry UI (lldap, see docker-compose-nifi-registry.yml)
+                        = the NiFi login "admin" proxied by NiFi
+                        -> initial admin: buckets read/write/delete, users, policies
+    - CN=nifi*, OU=NIFI = NiFi node certificates (nifi/certs) -> may proxy end users and read all buckets
+-->
+<authorizers>
+    <userGroupProvider>
+        <identifier>file-user-group-provider</identifier>
+        <class>org.apache.nifi.registry.security.authorization.file.FileUserGroupProvider</class>
+        <property name="Users File">./database/users.xml</property>
+        <property name="Initial User Identity 1">admin</property>
+        <property name="Initial User Identity 2">CN=nifi, OU=NIFI</property>
+        <property name="Initial User Identity 3">CN=nifi1, OU=NIFI</property>
+        <property name="Initial User Identity 4">CN=nifi2, OU=NIFI</property>
+        <property name="Initial User Identity 5">CN=nifi3, OU=NIFI</property>
+    </userGroupProvider>
+    <accessPolicyProvider>
+        <identifier>file-access-policy-provider</identifier>
+        <class>org.apache.nifi.registry.security.authorization.file.FileAccessPolicyProvider</class>
+        <property name="User Group Provider">file-user-group-provider</property>
+        <property name="Authorizations File">./database/authorizations.xml</property>
+        <property name="Initial Admin Identity">admin</property>
+        <property name="NiFi Identity 1">CN=nifi, OU=NIFI</property>
+        <property name="NiFi Identity 2">CN=nifi1, OU=NIFI</property>
+        <property name="NiFi Identity 3">CN=nifi2, OU=NIFI</property>
+        <property name="NiFi Identity 4">CN=nifi3, OU=NIFI</property>
+        <property name="NiFi Group Name"></property>
+    </accessPolicyProvider>
+    <authorizer>
+        <identifier>managed-authorizer</identifier>
+        <class>org.apache.nifi.registry.security.authorization.StandardManagedAuthorizer</class>
+        <property name="Access Policy Provider">file-access-policy-provider</property>
+    </authorizer>
+</authorizers>
