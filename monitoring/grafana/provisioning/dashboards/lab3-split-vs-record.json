@@ -1,0 +1,448 @@
+{
+  "uid": "lab3-split-vs-record",
+  "title": "Lab 3: Split vs Record",
+  "tags": [
+    "nifi",
+    "lab"
+  ],
+  "timezone": "browser",
+  "refresh": "5s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "schemaVersion": 39,
+  "version": 5,
+  "editable": true,
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "About",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 6
+      },
+      "targets": [],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Lab 3: Split vs Record.** Group **A - Split-based** vs **B - Record-based**.\n\n* NiFi reports most component values for a **rolling 5-minute window**: after a run the lines stay up for ~5 min, then drop to 0.\n* Prometheus scrapes every **15 s**: short spikes (B finishes in under a second) can fall between scrapes.\n* For a visible difference run each variant separately with a bigger `Number of Records` (100 000+). Exact per-run numbers: `make lab03-measure`."
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Task time, last 5 min",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 12,
+        "h": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "nifi_total_task_duration{component_type=\"ProcessGroup\", component_name=~\"[AB] - .*\"}",
+          "legendFormat": "{{component_name}}",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "FlowFiles In, all processors",
+      "description": "Sum of FlowFiles In over all processors of the group, as reported by NiFi.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 6,
+        "w": 12,
+        "h": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "sum by (group) (nifi_amount_items_input{component_type=\"Processor\"} * on(parent_id) group_left(group) label_replace(label_replace(0 * nifi_amount_items_queued{component_type=\"ProcessGroup\", component_name=~\"[AB] - .*\"} + 1, \"parent_id\", \"$1\", \"component_id\", \"(.*)\"), \"group\", \"$1\", \"component_name\", \"(.*)\"))",
+          "legendFormat": "{{group}}",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "FlowFiles queued",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "nifi_amount_items_queued{component_type=\"ProcessGroup\", component_name=~\"[AB] - .*\"}",
+          "legendFormat": "{{component_name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Task time (5-min window)",
+      "description": "Thread-milliseconds spent by the group's components in the past 5 minutes.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 11,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "nifi_total_task_duration{component_type=\"ProcessGroup\", component_name=~\"[AB] - .*\"}",
+          "legendFormat": "{{component_name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "JVM heap",
+      "description": "Heap of the whole NiFi JVM, not per group: run A and B at different times.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "nifi_jvm_heap_used",
+          "legendFormat": "used"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B",
+          "expr": "nifi_jvm_heap_committed",
+          "legendFormat": "committed"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "GC time per minute",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 19,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "increase(nifi_jvm_gc_time[1m])",
+          "legendFormat": "{{gc_name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 9,
+      "type": "bargauge",
+      "title": "A: FlowFiles In per processor",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 27,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "nifi_amount_items_input{component_type=\"Processor\"} * on(parent_id) group_left(group) label_replace(label_replace(0 * nifi_amount_items_queued{component_type=\"ProcessGroup\", component_name=\"A - Split-based\"} + 1, \"parent_id\", \"$1\", \"component_id\", \"(.*)\"), \"group\", \"$1\", \"component_name\", \"(.*)\")",
+          "legendFormat": "{{component_name}}",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      }
+    },
+    {
+      "id": 10,
+      "type": "bargauge",
+      "title": "B: FlowFiles In per processor",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 27,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "nifi_amount_items_input{component_type=\"Processor\"} * on(parent_id) group_left(group) label_replace(label_replace(0 * nifi_amount_items_queued{component_type=\"ProcessGroup\", component_name=\"B - Record-based\"} + 1, \"parent_id\", \"$1\", \"component_id\", \"(.*)\"), \"group\", \"$1\", \"component_name\", \"(.*)\")",
+          "legendFormat": "{{component_name}}",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "A: CPU time per processor",
+      "description": "Estimated CPU time per processor as reported by NiFi.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "nifi_processing_performance_cpu_duration{component_type=\"Processor\"} * on(parent_id) group_left(group) label_replace(label_replace(0 * nifi_amount_items_queued{component_type=\"ProcessGroup\", component_name=\"A - Split-based\"} + 1, \"parent_id\", \"$1\", \"component_id\", \"(.*)\"), \"group\", \"$1\", \"component_name\", \"(.*)\")",
+          "legendFormat": "{{component_name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "B: CPU time per processor",
+      "description": "Estimated CPU time per processor as reported by NiFi.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 35,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "nifi_processing_performance_cpu_duration{component_type=\"Processor\"} * on(parent_id) group_left(group) label_replace(label_replace(0 * nifi_amount_items_queued{component_type=\"ProcessGroup\", component_name=\"B - Record-based\"} + 1, \"parent_id\", \"$1\", \"component_id\", \"(.*)\"), \"group\", \"$1\", \"component_name\", \"(.*)\")",
+          "legendFormat": "{{component_name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {}
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}

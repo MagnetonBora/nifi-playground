@@ -1,4 +1,5 @@
 nifi/certs/
+nifi/data/
 
 # Splunk: settings changed in the UI for the playground app
 splunk/apps/nifi_playground/local/

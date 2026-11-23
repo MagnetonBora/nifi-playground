@@ -8,18 +8,19 @@ Each file is a single Process Group with its own Parameter Context holding the p
 | `lab1-first-flow.json` | Lab 1: NiFi UI and your first flow |
 | `lab2-multi-source-routing.json` | Lab 2: multiple sources and routing |
 | `lab3-split-vs-record.json` | Lab 3: Split flow vs Record flow |
-| `lab4-db-rest-kafka.json` | Lab 4: DB + REST + Kafka |
-| `lab5-ndjson-pipeline.json` | Lab 5: NDJSON transformation pipeline |
-| `lab6-splunk-delivery.json` | Lab 6: delivery to Splunk |
-| `lab7-retry-errors.json` | Lab 7: retries and error handling |
-| `lab8-performance.json` | Lab 8: performance test |
-| `lab9-final-pipeline.json` | Final lab (Block 3.5) |
+| `lab4-db-basics.json` | Lab 4: connecting to a database (read, incremental read, write) |
+| `lab5-db-rest-kafka.json` | Lab 5: DB + REST + Kafka |
+| `lab6-ndjson-pipeline.json` | Lab 6: NDJSON transformation pipeline |
+| `lab7-splunk-delivery.json` | Lab 7: delivery to Splunk |
+| `lab8-retry-errors.json` | Lab 8: retries and error handling |
+| `lab9-performance.json` | Lab 9: performance test |
+| `lab10-final-pipeline.json` | Final lab (Block 3.5) |
 
 ## Import
 
 ```bash
 make lab-setup                                    # once: table, topics, directories
-make import f=nifi/flows/lab4-db-rest-kafka.json  # into the single NiFi (glob: f="nifi/flows/lab*.json")
+make import f=nifi/flows/lab5-db-rest-kafka.json  # into the single NiFi (glob: f="nifi/flows/lab*.json")
 make import-cluster f=nifi/flows/<file>.json      # into the cluster
 ```
 

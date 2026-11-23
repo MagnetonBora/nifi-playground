@@ -1,4 +1,4 @@
--- Lab 4 (DB + REST + Kafka): target table for PutDatabaseRecord (UPSERT by order_id).
+-- Lab 5 (DB + REST + Kafka): target table for PutDatabaseRecord (UPSERT by order_id).
 -- Applied automatically on a fresh database (docker-entrypoint-initdb.d) and by `make lab-setup`.
 -- The CHECK constraint is intentional: order o-1002 (negative amount) must fail in the DB and go to the DLQ.
 CREATE TABLE IF NOT EXISTS orders_stage (

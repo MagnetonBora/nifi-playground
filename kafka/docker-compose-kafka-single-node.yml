@@ -44,7 +44,7 @@ services:
     environment:
       CDK_DATABASE_URL: "postgresql://conduktor:some_password@postgresql:5432/conduktor-console"
       CDK_CLUSTERS_0_ID: "default"
-      CDK_CLUSTERS_0_NAME: "Cryptoflow Kafka Cluster"
+      CDK_CLUSTERS_0_NAME: "NiFi Playground Kafka"
       CDK_CLUSTERS_0_COLOR: "#AAFFAA"
       CDK_CLUSTERS_0_BOOTSTRAPSERVERS: "PLAINTEXT://kafka1:19092"
       # CONSOLE_JAVA_OPTS: "-XX:UseSVE=0"

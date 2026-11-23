@@ -1,7 +1,7 @@
 {
   "flowContents": {
     "identifier": "db6d5fa1-5890-589b-87a0-c43fce66a666",
-    "name": "Lab 7 - Retry and error handling",
+    "name": "Lab 8 - Retry and error handling",
     "comments": "GenerateRecord -> ValidateRecord -> InvokeHTTP with RetryFlowFile; errors -> DLQ group",
     "position": {
       "x": 0,
@@ -194,7 +194,7 @@
         "flowFileConcurrency": "UNBOUNDED",
         "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
         "componentType": "PROCESS_GROUP",
-        "parameterContextName": "lab7-params",
+        "parameterContextName": "lab8-params",
         "groupIdentifier": "db6d5fa1-5890-589b-87a0-c43fce66a666"
       }
     ],
@@ -217,7 +217,7 @@
         "properties": {
           "Record Writer": "c1e2e959-a3d3-5f78-8a9f-200cbd656e42",
           "Number of Records": "5",
-          "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"Event\",\n  \"namespace\": \"workshop.lab7\",\n  \"fields\": [\n    {\n      \"name\": \"event_id\",\n      \"type\": [\n        \"null\",\n        \"string\"\n      ]\n    },\n    {\n      \"name\": \"user_id\",\n      \"type\": [\n        \"null\",\n        \"int\"\n      ]\n    },\n    {\n      \"name\": \"action\",\n      \"type\": [\n        \"null\",\n        {\n          \"type\": \"enum\",\n          \"name\": \"Action\",\n          \"symbols\": [\n            \"view\",\n            \"click\",\n            \"buy\"\n          ]\n        }\n      ]\n    },\n    {\n      \"name\": \"amount\",\n      \"type\": [\n        \"null\",\n        \"double\"\n      ]\n    }\n  ]\n}",
+          "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"Event\",\n  \"namespace\": \"workshop.lab8\",\n  \"fields\": [\n    {\n      \"name\": \"event_id\",\n      \"type\": [\n        \"null\",\n        \"string\"\n      ]\n    },\n    {\n      \"name\": \"user_id\",\n      \"type\": [\n        \"null\",\n        \"int\"\n      ]\n    },\n    {\n      \"name\": \"action\",\n      \"type\": [\n        \"null\",\n        {\n          \"type\": \"enum\",\n          \"name\": \"Action\",\n          \"symbols\": [\n            \"view\",\n            \"click\",\n            \"buy\"\n          ]\n        }\n      ]\n    },\n    {\n      \"name\": \"amount\",\n      \"type\": [\n        \"null\",\n        \"double\"\n      ]\n    }\n  ]\n}",
           "Nullable Fields": "true",
           "Null Value Percentage": "5"
         },
@@ -1035,7 +1035,7 @@
         },
         "properties": {
           "Schema Access Strategy": "schema-text-property",
-          "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"Event\",\n  \"namespace\": \"workshop.lab7\",\n  \"fields\": [\n    {\n      \"name\": \"event_id\",\n      \"type\": [\n        \"null\",\n        \"string\"\n      ]\n    },\n    {\n      \"name\": \"user_id\",\n      \"type\": [\n        \"null\",\n        \"int\"\n      ]\n    },\n    {\n      \"name\": \"action\",\n      \"type\": [\n        \"null\",\n        {\n          \"type\": \"enum\",\n          \"name\": \"Action\",\n          \"symbols\": [\n            \"view\",\n            \"click\",\n            \"buy\"\n          ]\n        }\n      ]\n    },\n    {\n      \"name\": \"amount\",\n      \"type\": [\n        \"null\",\n        \"double\"\n      ]\n    }\n  ]\n}"
+          "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"Event\",\n  \"namespace\": \"workshop.lab8\",\n  \"fields\": [\n    {\n      \"name\": \"event_id\",\n      \"type\": [\n        \"null\",\n        \"string\"\n      ]\n    },\n    {\n      \"name\": \"user_id\",\n      \"type\": [\n        \"null\",\n        \"int\"\n      ]\n    },\n    {\n      \"name\": \"action\",\n      \"type\": [\n        \"null\",\n        {\n          \"type\": \"enum\",\n          \"name\": \"Action\",\n          \"symbols\": [\n            \"view\",\n            \"click\",\n            \"buy\"\n          ]\n        }\n      ]\n    },\n    {\n      \"name\": \"amount\",\n      \"type\": [\n        \"null\",\n        \"double\"\n      ]\n    }\n  ]\n}"
         },
         "propertyDescriptors": {},
         "controllerServiceApis": [
@@ -1096,13 +1096,13 @@
     "flowFileConcurrency": "UNBOUNDED",
     "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
     "componentType": "PROCESS_GROUP",
-    "parameterContextName": "lab7-params"
+    "parameterContextName": "lab8-params"
   },
   "externalControllerServices": {},
   "parameterContexts": {
-    "lab7-params": {
-      "name": "lab7-params",
-      "description": "Lab 7: flaky API and directories",
+    "lab8-params": {
+      "name": "lab8-params",
+      "description": "Lab 8: flaky API and directories",
       "parameters": [
         {
           "name": "flaky.url",
@@ -1127,7 +1127,7 @@
         },
         {
           "name": "event.schema.strict",
-          "value": "{\n  \"type\": \"record\",\n  \"name\": \"Event\",\n  \"namespace\": \"workshop.lab7\",\n  \"fields\": [\n    {\n      \"name\": \"event_id\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user_id\",\n      \"type\": \"int\"\n    },\n    {\n      \"name\": \"action\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Action\",\n        \"symbols\": [\n          \"view\",\n          \"click\",\n          \"buy\"\n        ]\n      }\n    },\n    {\n      \"name\": \"amount\",\n      \"type\": \"double\"\n    }\n  ]\n}",
+          "value": "{\n  \"type\": \"record\",\n  \"name\": \"Event\",\n  \"namespace\": \"workshop.lab8\",\n  \"fields\": [\n    {\n      \"name\": \"event_id\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user_id\",\n      \"type\": \"int\"\n    },\n    {\n      \"name\": \"action\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Action\",\n        \"symbols\": [\n          \"view\",\n          \"click\",\n          \"buy\"\n        ]\n      }\n    },\n    {\n      \"name\": \"amount\",\n      \"type\": \"double\"\n    }\n  ]\n}",
           "description": "Validation schema: all fields required",
           "sensitive": false,
           "provided": false

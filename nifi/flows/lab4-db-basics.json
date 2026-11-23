@@ -1,0 +1,573 @@
+{
+  "flowContents": {
+    "identifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+    "name": "Lab 4 - Database basics",
+    "comments": "ExecuteSQLRecord -> PutDatabaseRecord (UPSERT into customers_gold); QueryDatabaseTableRecord: incremental read by id. Tables: make lab-setup. New rows: make lab4-insert n=10",
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "defaultFlowFileExpiration": "0 sec",
+    "defaultBackPressureObjectThreshold": 10000,
+    "defaultBackPressureDataSizeThreshold": "1 GB",
+    "scheduledState": "ENABLED",
+    "executionEngine": "INHERITED",
+    "maxConcurrentTasks": 1,
+    "statelessFlowTimeout": "1 min",
+    "flowFileConcurrency": "UNBOUNDED",
+    "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+    "componentType": "PROCESS_GROUP",
+    "parameterContextName": "lab4-params",
+    "processGroups": [],
+    "remoteProcessGroups": [],
+    "processors": [
+      {
+        "identifier": "4ddafb67-af0c-51c1-91f7-e9d0da3f9f41",
+        "name": "Read gold customers",
+        "comments": "Use Run Once. Output: one FlowFile, all rows; executesql.row.count = number of rows",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "type": "org.apache.nifi.processors.standard.ExecuteSQLRecord",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Database Connection Pooling Service": "2ec49f81-72f6-5ca6-a1c0-a01405fc8db8",
+          "SQL Query": "SELECT id, name, tier, country\nFROM customers\nWHERE tier = 'gold'\nORDER BY id",
+          "Record Writer": "8907cbbb-8655-59bf-817c-ebf66b215ebf"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "1 min",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "PRIMARY",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "97fe4223-11f5-524b-ad51-377603b9c59b",
+        "name": "Copy to customers_gold",
+        "comments": "UPSERT by id: a repeated run updates the same rows instead of failing on the primary key",
+        "position": {
+          "x": 0,
+          "y": 250
+        },
+        "type": "org.apache.nifi.processors.standard.PutDatabaseRecord",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Record Reader": "809a584a-fd88-5825-8c88-c075f615f5e5",
+          "Database Type": "PostgreSQL",
+          "Statement Type": "UPSERT",
+          "Database Connection Pooling Service": "2ec49f81-72f6-5ca6-a1c0-a01405fc8db8",
+          "Table Name": "customers_gold",
+          "Update Keys": "id",
+          "Unmatched Field Behavior": "Ignore Unmatched Fields",
+          "Unmatched Column Behavior": "Ignore Unmatched Columns"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "afca8be5-9c90-5454-8ec0-c87560eaf7f7",
+        "name": "LogAttribute (copied)",
+        "comments": "",
+        "position": {
+          "x": 0,
+          "y": 500
+        },
+        "type": "org.apache.nifi.processors.standard.LogAttribute",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Log Level": "info"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [
+          "success"
+        ],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "c509f9e3-04d9-5493-a8e7-6ab68ef067b2",
+        "name": "LogAttribute (db error)",
+        "comments": "",
+        "position": {
+          "x": 500,
+          "y": 250
+        },
+        "type": "org.apache.nifi.processors.standard.LogAttribute",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Log Level": "error"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [
+          "success"
+        ],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "3e606455-db11-5b94-a795-f068aa04f60f",
+        "name": "Read new customers",
+        "comments": "Incremental read: remembers max(id) in its state (View State). New rows: make lab4-insert n=10",
+        "position": {
+          "x": 1000,
+          "y": 0
+        },
+        "type": "org.apache.nifi.processors.standard.QueryDatabaseTableRecord",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Database Connection Pooling Service": "2ec49f81-72f6-5ca6-a1c0-a01405fc8db8",
+          "Database Type": "PostgreSQL",
+          "Table Name": "customers",
+          "Columns to Return": "id, name, tier, country",
+          "Maximum-value Columns": "id",
+          "Record Writer": "8907cbbb-8655-59bf-817c-ebf66b215ebf",
+          "Initial Load Strategy": "Start at Beginning"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "15 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "PRIMARY",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "8ab3aef7-9d4d-50a9-a7a9-ae7113ec2a90",
+        "name": "LogAttribute (new rows)",
+        "comments": "",
+        "position": {
+          "x": 1000,
+          "y": 250
+        },
+        "type": "org.apache.nifi.processors.standard.LogAttribute",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Log Level": "info"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [
+          "success"
+        ],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      }
+    ],
+    "inputPorts": [],
+    "outputPorts": [],
+    "connections": [
+      {
+        "identifier": "48aec872-375f-5ca2-a83e-3d94fb2c1879",
+        "name": "",
+        "source": {
+          "id": "4ddafb67-af0c-51c1-91f7-e9d0da3f9f41",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "Read gold customers",
+          "comments": ""
+        },
+        "destination": {
+          "id": "97fe4223-11f5-524b-ad51-377603b9c59b",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "Copy to customers_gold",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [
+          "success"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "cb0172e1-c449-523a-8de3-100ad7cb22b7",
+        "name": "",
+        "source": {
+          "id": "4ddafb67-af0c-51c1-91f7-e9d0da3f9f41",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "Read gold customers",
+          "comments": ""
+        },
+        "destination": {
+          "id": "c509f9e3-04d9-5493-a8e7-6ab68ef067b2",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "LogAttribute (db error)",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [
+          "failure"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "91513ede-a805-5228-b41a-3367ac9a33d5",
+        "name": "",
+        "source": {
+          "id": "97fe4223-11f5-524b-ad51-377603b9c59b",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "Copy to customers_gold",
+          "comments": ""
+        },
+        "destination": {
+          "id": "afca8be5-9c90-5454-8ec0-c87560eaf7f7",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "LogAttribute (copied)",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [
+          "success"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "0f5ce7b3-dc15-5362-b28b-afddd516bb51",
+        "name": "",
+        "source": {
+          "id": "97fe4223-11f5-524b-ad51-377603b9c59b",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "Copy to customers_gold",
+          "comments": ""
+        },
+        "destination": {
+          "id": "c509f9e3-04d9-5493-a8e7-6ab68ef067b2",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "LogAttribute (db error)",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [
+          "failure",
+          "retry"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "e623703b-b511-51da-ac1e-41a9428095c3",
+        "name": "",
+        "source": {
+          "id": "3e606455-db11-5b94-a795-f068aa04f60f",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "Read new customers",
+          "comments": ""
+        },
+        "destination": {
+          "id": "8ab3aef7-9d4d-50a9-a7a9-ae7113ec2a90",
+          "type": "PROCESSOR",
+          "groupId": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a",
+          "name": "LogAttribute (new rows)",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [
+          "success"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      }
+    ],
+    "labels": [],
+    "funnels": [],
+    "controllerServices": [
+      {
+        "identifier": "2ec49f81-72f6-5ca6-a1c0-a01405fc8db8",
+        "name": "db-pool",
+        "comments": "",
+        "type": "org.apache.nifi.dbcp.DBCPConnectionPool",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-dbcp-service-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Database Connection URL": "#{db.url}",
+          "Database Driver Class Name": "org.postgresql.Driver",
+          "Database Driver Locations": "#{db.driver}",
+          "Database User": "#{db.user}",
+          "Password": "#{db.password}"
+        },
+        "propertyDescriptors": {},
+        "controllerServiceApis": [
+          {
+            "type": "org.apache.nifi.dbcp.DBCPService",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-services-api-nar",
+              "version": "2.12.0"
+            }
+          }
+        ],
+        "scheduledState": "DISABLED",
+        "bulletinLevel": "WARN",
+        "componentType": "CONTROLLER_SERVICE",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "8907cbbb-8655-59bf-817c-ebf66b215ebf",
+        "name": "writer-json",
+        "comments": "",
+        "type": "org.apache.nifi.json.JsonRecordSetWriter",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-record-serialization-services-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Output Grouping": "output-oneline",
+          "Pretty Print JSON": "false",
+          "Schema Write Strategy": "no-schema",
+          "Schema Access Strategy": "inherit-record-schema"
+        },
+        "propertyDescriptors": {},
+        "controllerServiceApis": [
+          {
+            "type": "org.apache.nifi.serialization.RecordSetWriterFactory",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-services-api-nar",
+              "version": "2.12.0"
+            }
+          }
+        ],
+        "scheduledState": "DISABLED",
+        "bulletinLevel": "WARN",
+        "componentType": "CONTROLLER_SERVICE",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      },
+      {
+        "identifier": "809a584a-fd88-5825-8c88-c075f615f5e5",
+        "name": "reader-json",
+        "comments": "",
+        "type": "org.apache.nifi.json.JsonTreeReader",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-record-serialization-services-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Schema Access Strategy": "infer-schema"
+        },
+        "propertyDescriptors": {},
+        "controllerServiceApis": [
+          {
+            "type": "org.apache.nifi.serialization.RecordReaderFactory",
+            "bundle": {
+              "group": "org.apache.nifi",
+              "artifact": "nifi-standard-services-api-nar",
+              "version": "2.12.0"
+            }
+          }
+        ],
+        "scheduledState": "DISABLED",
+        "bulletinLevel": "WARN",
+        "componentType": "CONTROLLER_SERVICE",
+        "groupIdentifier": "e3569f56-1a9a-5e9f-b89e-063028bd5d8a"
+      }
+    ]
+  },
+  "externalControllerServices": {},
+  "parameterContexts": {
+    "lab4-params": {
+      "name": "lab4-params",
+      "description": "Lab 4: Postgres connection",
+      "parameters": [
+        {
+          "name": "db.url",
+          "value": "jdbc:postgresql://postgres:5432/nifi",
+          "description": "Postgres inside nifi-net",
+          "sensitive": false,
+          "provided": false
+        },
+        {
+          "name": "db.user",
+          "value": "nifi",
+          "description": "DB user",
+          "sensitive": false,
+          "provided": false
+        },
+        {
+          "name": "db.password",
+          "value": "nifi",
+          "description": "DB password (sensitive)",
+          "sensitive": true,
+          "provided": false
+        },
+        {
+          "name": "db.driver",
+          "value": "/opt/nifi/drivers/postgresql-42.7.14.jar",
+          "description": "JDBC driver (on the host: nifi/drivers)",
+          "sensitive": false,
+          "provided": false
+        }
+      ],
+      "inheritedParameterContexts": [],
+      "componentType": "PARAMETER_CONTEXT"
+    }
+  },
+  "flowEncodingVersion": "1.0",
+  "parameterProviders": {},
+  "latest": false
+}

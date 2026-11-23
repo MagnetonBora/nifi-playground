@@ -120,6 +120,28 @@ services:
     networks:
       - nifi-net
 
+  # Tool (not started by `up`): Lab 3 measurements, split flow vs record flow. Prints the report and
+  # saves it to nifi/data/results/lab3-measure-<time>.txt. Run: make lab03-measure
+  lab3-measure:
+    image: python:3.12-slim
+    profiles: ["tools"]
+    entrypoint:
+      - bash
+      - -o
+      - pipefail
+      - -c
+      - python3 -u /nifi-common/lab3-measure.py | tee "/results/lab3-measure-$$(date +%Y%m%d-%H%M%S).txt"
+    environment:
+      NIFI_URL: https://nifi:8443
+      NIFI_USERNAME: *admin-user
+      NIFI_PASSWORD: *admin-pass
+    volumes:
+      - ../common:/nifi-common:ro
+      - ../certs/ca.crt:/certs/ca.crt:ro
+      - ../data/results:/results
+    networks:
+      - nifi-net
+
 networks:
   # Shared with the registry / postgres / kafka / monitoring compose files (make network)
   nifi-net:

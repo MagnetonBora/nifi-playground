@@ -1,6 +1,7 @@
-"""Customers REST API for Lab 4 (LookupRecord + RestLookupService).
+"""Customers REST API for Lab 5 (LookupRecord + RestLookupService).
 
-  HTTP :8000  GET /customers/<id> -> customer JSON for c-1 and c-2, 404 with empty body otherwise
+  HTTP :8000  GET /customers/<id> -> customer JSON for c-1 ... c-20, 404 with empty body otherwise
+  (c-9xxx ids in lab5-orders.ndjson are deliberately unknown)
 """
 import json
 
@@ -11,6 +12,20 @@ CUSTOMERS = {
     "c-1": {"customer_id": "c-1", "customer_name": "Alice Example", "customer_tier": "gold", "country": "DE"},
     "c-2": {"customer_id": "c-2", "customer_name": "Bob Example", "customer_tier": "silver", "country": "FR"},
 }
+# c-3 ... c-20: fictional customers; (name, tier, country)
+MORE = [
+    ("Lena Hoffmann", "gold", "DE"),       ("Mathis Lefevre", "bronze", "FR"),
+    ("Zofia Wisniewska", "silver", "PL"),  ("Taras Melnyk", "gold", "UA"),
+    ("Grace Whitfield", "bronze", "US"),   ("Jonas Becker", "silver", "DE"),
+    ("Chloe Garnier", "gold", "FR"),       ("Piotr Zielinski", "bronze", "PL"),
+    ("Oksana Bondar", "silver", "UA"),     ("Marcus Delgado", "gold", "US"),
+    ("Hanna Krause", "bronze", "DE"),      ("Hugo Marchand", "silver", "FR"),
+    ("Agnieszka Lewandowska", "gold", "PL"), ("Dmytro Kravets", "bronze", "UA"),
+    ("Naomi Brooks", "silver", "US"),      ("Felix Wagner", "gold", "DE"),
+    ("Ines Rousseau", "bronze", "FR"),     ("Mykola Savchenko", "silver", "UA"),
+]
+for n, (name, tier, country) in enumerate(MORE, start=3):
+    CUSTOMERS[f"c-{n}"] = {"customer_id": f"c-{n}", "customer_name": name, "customer_tier": tier, "country": country}
 
 
 class Customers(Quiet):

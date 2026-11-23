@@ -7,7 +7,8 @@
 - cluster nodes (CN=nifiN, OU=NIFI): view/modify data, view provenance, so they can
                 proxy queue listing / provenance requests
 - prometheus (CN=prometheus, OU=NIFI): read-only /flow, required for
-                /nifi-api/flow/metrics/prometheus; the user is created if missing
+                /nifi-api/flow/metrics/prometheus, and view on the root process group, so the
+                metrics carry component names; the user is created if missing
 - registry client "NiFi Registry" -> https://nifi-registry:18443 (env REGISTRY_URL)
 
 Runs inside the nifi-net network (see Makefile target "policies"):
@@ -106,7 +107,9 @@ POLICIES = [
     ("/tenants", RW, [admin]),
     ("/policies", RW, [admin]),
     ("/controller", RW, [admin]),
-    (f"/process-groups/{root_id}", RW, [admin]),
+    # prometheus may view components: without it the metrics carry UUIDs instead of component names
+    (f"/process-groups/{root_id}", R, [admin, prometheus]),
+    (f"/process-groups/{root_id}", W, [admin]),
     (f"/data/process-groups/{root_id}", RW, [admin] + nodes),
     (f"/operation/process-groups/{root_id}", W, [admin]),
     (f"/provenance-data/process-groups/{root_id}", R, [admin] + nodes),

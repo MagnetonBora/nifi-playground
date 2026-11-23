@@ -33,7 +33,7 @@ CLEAN_INIT = @docker container prune -f --filter label=playground.role=init >/de
         nifi cluster registry postgres kafka monitoring prometheus grafana splunk policies-nifi policies-cluster \
         nifi-down cluster-down registry-down postgres-down kafka-down monitoring-down prometheus-down grafana-down splunk-down \
         ps logs urls destroy clean-init \
-        lab-services lab-services-down lab-setup import import-cluster lab4-data lab-final-load lab-splunk-count
+        lab-services lab-services-down lab-setup import import-cluster lab03-measure lab4-insert lab05-data lab-final-load lab-splunk-count
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z0-9_-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -135,8 +135,9 @@ lab-services: network ## Start lab stubs: customers-api, splunk-sim, flaky
 lab-services-down: ## Stop lab stubs
 	$(COMPOSE) $(LABS) down
 
-lab-setup: ## Prepare labs: Postgres table, Kafka topics, data dirs (needs postgres + kafka; idempotent)
-	docker exec -i nifi-postgres psql -q -U nifi -d nifi -v ON_ERROR_STOP=1 < postgres/init/01-lab4-orders.sql
+lab-setup: ## Prepare labs: Postgres tables, Kafka topics, data dirs (needs postgres + kafka; idempotent)
+	docker exec -i nifi-postgres psql -q -U nifi -d nifi -v ON_ERROR_STOP=1 < postgres/init/01-lab4-customers.sql
+	docker exec -i nifi-postgres psql -q -U nifi -d nifi -v ON_ERROR_STOP=1 < postgres/init/02-lab5-orders.sql
 	@for t in orders.raw:1 orders.enriched:1 orders.dlq:1 logs.raw:6 logs.dlq:1; do \
 		docker exec kafka1 kafka-topics --bootstrap-server kafka1:19092 --create --if-not-exists \
 			--topic $${t%%:*} --partitions $${t##*:} --replication-factor 1 >/dev/null && echo "topic $${t%%:*} ok"; \
@@ -151,8 +152,17 @@ import-cluster: ## Import flow definitions into the cluster: make import-cluster
 	@test -n "$(f)" || { echo 'usage: make import-cluster f=nifi/flows/<file>.json'; exit 1; }
 	$(COMPOSE) $(CLUSTER) run --rm --no-deps nifi-cluster-import $(addprefix /flows/,$(notdir $(wildcard $(f))))
 
-lab4-data: ## Lab 4: send the 4 test orders to Kafka topic orders.raw
-	docker exec -i kafka1 kafka-console-producer --bootstrap-server kafka1:19092 --topic orders.raw < lab-services/data/lab4-orders.ndjson
+lab03-measure: ## Lab 3: run split vs record variants, report to terminal and nifi/data/results/ (single NiFi)
+	@mkdir -p nifi/data/results
+	$(COMPOSE) $(SINGLE) run --rm --no-deps lab3-measure
+
+lab4-insert: ## Lab 4: add n (default 10) new gold customers to table customers: make lab4-insert n=10
+	docker exec nifi-postgres psql -q -U nifi -d nifi -v ON_ERROR_STOP=1 -c \
+		"INSERT INTO customers (name, tier, country) SELECT 'New customer ' || g, 'gold', 'DE' FROM generate_series(1, $(or $(n),10)) AS g"
+	@docker exec nifi-postgres psql -At -U nifi -d nifi -c "SELECT 'customers: ' || count(*) || ' rows, max id ' || max(id) FROM customers"
+
+lab05-data: ## Lab 5: send 100 test orders (82 valid, 6 per error path) to Kafka topic orders.raw
+	docker exec -i kafka1 kafka-console-producer --bootstrap-server kafka1:19092 --topic orders.raw < lab-services/data/lab5-orders.ndjson
 
 lab-final-load: ## Final lab: send n (default 100000) log events to logs.raw: make lab-final-load n=10000
 	python3 lab-services/produce_logs.py $(or $(n),100000) | \

@@ -3,9 +3,9 @@
 #   make lab-services
 #
 # From NiFi:
-#   customers-api  http://customers-api:8000/customers/<id>        (Lab 4, RestLookupService)   customers_api.py
-#   splunk-sim     tcp splunk-sim:5514, http://splunk-sim:8088/... (Lab 6, final lab)            splunk_sim.py
-#   flaky          http://flaky:9099/events                        (Lab 7, 60% 200 / 30% 503 / 10% 400)  flaky.py
+#   customers-api  http://customers-api:8000/customers/<id>        (Lab 5, RestLookupService)   customers_api.py
+#   splunk-sim     tcp splunk-sim:5514, http://splunk-sim:8088/... (Lab 7, final lab)            splunk_sim.py
+#   flaky          http://flaky:9099/events                        (Lab 8, 60% 200 / 30% 503 / 10% 400)  flaky.py
 # Shared handler code for customers_api.py and splunk_sim.py: common.py (flaky.py is standalone)
 # Received events: make lab-splunk-count   (files in the lab_splunk_data volume)
 

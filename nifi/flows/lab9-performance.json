@@ -1,8 +1,8 @@
 {
   "flowContents": {
     "identifier": "4cc07515-38a5-530f-98c0-c514e6538b36",
-    "name": "Lab 8 - Performance test",
-    "comments": "Lab 5 pipeline under load. Scenario A (baseline): Reader with Infer Schema. B: switch the Record Reader to r-log-explicit. C-F: Concurrent Tasks, batch size, heap. Counter lab8.records.out: Counters menu",
+    "name": "Lab 9 - Performance test",
+    "comments": "Lab 6 pipeline under load. Scenario A (baseline): Reader with Infer Schema. B: switch the Record Reader to r-log-explicit. C-F: Concurrent Tasks, batch size, heap. Counter lab9.records.out: Counters menu",
     "position": {
       "x": 0,
       "y": 0
@@ -190,7 +190,7 @@
           "version": "2.12.0"
         },
         "properties": {
-          "Counter Name": "lab8.records.out",
+          "Counter Name": "lab9.records.out",
           "Delta": "${record.count}"
         },
         "propertyDescriptors": {},
@@ -227,7 +227,7 @@
           "version": "2.12.0"
         },
         "properties": {
-          "filename": "lab8-${now():format('ss')}.ndjson"
+          "filename": "lab9-${now():format('ss')}.ndjson"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -659,17 +659,17 @@
     "flowFileConcurrency": "UNBOUNDED",
     "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
     "componentType": "PROCESS_GROUP",
-    "parameterContextName": "lab8-params"
+    "parameterContextName": "lab9-params"
   },
   "externalControllerServices": {},
   "parameterContexts": {
-    "lab8-params": {
-      "name": "lab8-params",
-      "description": "Lab 8: load test of the Lab 5 pipeline",
+    "lab9-params": {
+      "name": "lab9-params",
+      "description": "Lab 9: load test of the Lab 6 pipeline",
       "parameters": [
         {
           "name": "out.dir",
-          "value": "/opt/nifi/data/lab8-out",
+          "value": "/opt/nifi/data/lab9-out",
           "description": "Output (files are overwritten per second: at most 60)",
           "sensitive": false,
           "provided": false

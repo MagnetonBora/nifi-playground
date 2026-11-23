@@ -1,8 +1,8 @@
 {
   "flowContents": {
     "identifier": "25f4131c-2121-591c-af04-36df7f2b7468",
-    "name": "Lab 4 - DB + REST + Kafka",
-    "comments": "orders.raw -> ValidateRecord(order.v1) -> LookupRecord(REST) -> PutDatabaseRecord(UPSERT) -> orders.enriched; errors -> orders.dlq. Data: make lab4-data",
+    "name": "Lab 5 - DB + REST + Kafka",
+    "comments": "orders.raw -> ValidateRecord(order.v1) -> LookupRecord(REST) -> PutDatabaseRecord(UPSERT) -> orders.enriched; errors -> orders.dlq. Data: make lab05-data",
     "position": {
       "x": 0,
       "y": 0
@@ -26,7 +26,7 @@
         },
         "properties": {
           "Kafka Connection Service": "a76fb114-4bbe-529e-8a29-2b36989ceaf5",
-          "Group ID": "nifi-lab4",
+          "Group ID": "nifi-lab05",
           "Topics": "#{topic.in}",
           "auto.offset.reset": "earliest",
           "Processing Strategy": "RECORD",
@@ -1068,7 +1068,7 @@
       {
         "identifier": "ba2031be-15ab-565b-8802-59e2cb0dc4db",
         "name": "schema-registry",
-        "comments": "order.v1 from Block 1.3, customer field replaced with customer_id (as in the Lab 4 data)",
+        "comments": "order.v1 from Block 1.3, customer field replaced with customer_id (as in the Lab 5 data)",
         "type": "org.apache.nifi.schemaregistry.services.AvroSchemaRegistry",
         "bundle": {
           "group": "org.apache.nifi",
@@ -1331,13 +1331,13 @@
     "flowFileConcurrency": "UNBOUNDED",
     "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
     "componentType": "PROCESS_GROUP",
-    "parameterContextName": "lab4-params"
+    "parameterContextName": "lab5-params"
   },
   "externalControllerServices": {},
   "parameterContexts": {
-    "lab4-params": {
-      "name": "lab4-params",
-      "description": "Lab 4: Kafka, Postgres, customers REST API",
+    "lab5-params": {
+      "name": "lab5-params",
+      "description": "Lab 5: Kafka, Postgres, customers REST API",
       "parameters": [
         {
           "name": "kafka.bootstrap",

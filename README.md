@@ -62,9 +62,11 @@ and Grafana is already connected to Prometheus. A Registry Client pointing to Ni
 Reference solutions for all workshop labs are in [nifi/flows](nifi/flows/README.md).
 
 ```bash
-make import f=nifi/flows/lab4-db-rest-kafka.json   # import a flow into the single NiFi
+make import f=nifi/flows/lab5-db-rest-kafka.json   # import a flow into the single NiFi
 make import-cluster f=nifi/flows/<file>.json        # same for the cluster
-make lab4-data                                      # test orders for Lab 4
+make lab03-measure                                  # Lab 3 measurements: split vs record
+make lab4-insert n=10                               # new rows for the incremental read in Lab 4
+make lab05-data                                     # test orders for Lab 5
 make lab-final-load n=100000                        # load for the final lab
 make lab-splunk-count                               # how many events the Splunk emulator received
 ```
@@ -108,6 +110,6 @@ Each compose file is named `docker-compose-<name>.yml` and lives in its stack's 
   `/opt/nifi/drivers/<file>.jar` in `DBCPConnectionPool` — no restart required.
 - **Re-running Kafka labs.** The consumer group remembers consumed messages; reset it before re-running,
   for example
-  `docker exec kafka1 kafka-consumer-groups --bootstrap-server kafka1:19092 --delete --group nifi-lab4`.
+  `docker exec kafka1 kafka-consumer-groups --bootstrap-server kafka1:19092 --delete --group nifi-lab05`.
 - **Splunk** uses an amd64 image (emulated on Apple Silicon); the first start takes a few minutes,
   and the trial license is valid for 60 days.

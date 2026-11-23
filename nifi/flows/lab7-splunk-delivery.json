@@ -1,7 +1,7 @@
 {
   "flowContents": {
     "identifier": "a846f307-a17a-5549-9ef2-2623f89e9be1",
-    "name": "Lab 6 - Splunk delivery",
+    "name": "Lab 7 - Splunk delivery",
     "comments": "Event generator -> MergeRecord -> PutSplunk (TCP) or InvokeHTTP (HEC). Check: make lab-splunk-count",
     "position": {
       "x": 0,
@@ -103,7 +103,7 @@
           {
             "identifier": "912890c8-8811-52a8-b159-fd243c7ffb56",
             "name": "PutSplunk",
-            "comments": "Variant 3: Concurrent Tasks = 2, 4",
+            "comments": "Variant 3: Concurrent Tasks = 2, 4.\nReal Splunk (make splunk): in lab7-params set splunk.host = splunk (instead of splunk-sim); port 5514 stays. Search in http://localhost:8000: index=nifi",
             "position": {
               "x": 0,
               "y": 400
@@ -296,7 +296,7 @@
         "flowFileConcurrency": "UNBOUNDED",
         "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
         "componentType": "PROCESS_GROUP",
-        "parameterContextName": "lab6-params",
+        "parameterContextName": "lab7-params",
         "groupIdentifier": "a846f307-a17a-5549-9ef2-2623f89e9be1"
       },
       {
@@ -394,7 +394,7 @@
           {
             "identifier": "435379b0-c7e3-51f6-836b-26e55dcab227",
             "name": "InvokeHTTP",
-            "comments": "The dynamic Authorization property becomes an HTTP header",
+            "comments": "The dynamic Authorization property becomes an HTTP header.\nReal Splunk (make splunk): in lab7-params set hec.url = http://splunk:8088/services/collector/raw (/event would need each event wrapped in {\"event\": ...}). Search in http://localhost:8000: index=nifi",
             "position": {
               "x": 0,
               "y": 400
@@ -590,7 +590,7 @@
         "flowFileConcurrency": "UNBOUNDED",
         "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
         "componentType": "PROCESS_GROUP",
-        "parameterContextName": "lab6-params",
+        "parameterContextName": "lab7-params",
         "groupIdentifier": "a846f307-a17a-5549-9ef2-2623f89e9be1"
       }
     ],
@@ -675,13 +675,13 @@
     "flowFileConcurrency": "UNBOUNDED",
     "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
     "componentType": "PROCESS_GROUP",
-    "parameterContextName": "lab6-params"
+    "parameterContextName": "lab7-params"
   },
   "externalControllerServices": {},
   "parameterContexts": {
-    "lab6-params": {
-      "name": "lab6-params",
-      "description": "Lab 6: Splunk emulator (lab-services)",
+    "lab7-params": {
+      "name": "lab7-params",
+      "description": "Lab 7: Splunk emulator (lab-services)",
       "parameters": [
         {
           "name": "splunk.host",

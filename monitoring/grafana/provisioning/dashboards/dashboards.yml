@@ -1,0 +1,11 @@
+apiVersion: 1
+
+# Dashboards from this folder (*.json) are loaded at Grafana start and re-read every 30 s.
+providers:
+  - name: playground
+    folder: NiFi playground
+    type: file
+    allowUiUpdates: true
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/provisioning/dashboards
