@@ -40,7 +40,22 @@
           "SQL Query": "SELECT id, name, tier, country\nFROM customers\nWHERE tier = 'gold'\nORDER BY id",
           "Record Writer": "8907cbbb-8655-59bf-817c-ebf66b215ebf"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Database Connection Pooling Service": {
+            "name": "Database Connection Pooling Service",
+            "displayName": "Database Connection Pooling Service",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "1 min",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -83,7 +98,22 @@
           "Unmatched Field Behavior": "Ignore Unmatched Fields",
           "Unmatched Column Behavior": "Ignore Unmatched Columns"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Database Connection Pooling Service": {
+            "name": "Database Connection Pooling Service",
+            "displayName": "Database Connection Pooling Service",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -201,7 +231,22 @@
           "Record Writer": "8907cbbb-8655-59bf-817c-ebf66b215ebf",
           "Initial Load Strategy": "Start at Beginning"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Database Connection Pooling Service": {
+            "name": "Database Connection Pooling Service",
+            "displayName": "Database Connection Pooling Service",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "15 sec",
         "schedulingStrategy": "TIMER_DRIVEN",

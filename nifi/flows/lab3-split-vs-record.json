@@ -38,7 +38,15 @@
               "Number of Records": "10000",
               "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"GeneratedOrder\",\n  \"namespace\": \"workshop.lab3\",\n  \"fields\": [\n    {\n      \"name\": \"order_id\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"customer\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"amount\",\n      \"type\": \"double\"\n    },\n    {\n      \"name\": \"currency\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Currency\",\n        \"symbols\": [\n          \"EUR\",\n          \"USD\",\n          \"GBP\"\n        ]\n      }\n    }\n  ]\n}"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "1 min",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -76,7 +84,22 @@
               "Record Writer": "df79e2d3-e441-5d68-bf94-fef86688b74f",
               "Records Per Split": "1"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -615,7 +638,15 @@
               "Number of Records": "10000",
               "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"GeneratedOrder\",\n  \"namespace\": \"workshop.lab3\",\n  \"fields\": [\n    {\n      \"name\": \"order_id\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"customer\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"amount\",\n      \"type\": \"double\"\n    },\n    {\n      \"name\": \"currency\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Currency\",\n        \"symbols\": [\n          \"EUR\",\n          \"USD\",\n          \"GBP\"\n        ]\n      }\n    }\n  ]\n}"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "1 min",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -654,7 +685,22 @@
               "valid": "SELECT order_id, customer, amount, currency\nFROM FLOWFILE\nWHERE amount > 0 AND currency IN ('EUR', 'USD')",
               "rejected": "SELECT * FROM FLOWFILE WHERE amount <= 0 OR currency NOT IN ('EUR', 'USD')"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -696,7 +742,22 @@
               "Replacement Value Strategy": "literal-value",
               "/stage": "processed"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",

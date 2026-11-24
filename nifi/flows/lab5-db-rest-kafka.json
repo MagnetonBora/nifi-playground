@@ -34,7 +34,29 @@
           "Record Writer": "5b390c25-2c26-5594-8519-6a43225d2b3f",
           "Output Strategy": "USE_VALUE"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Kafka Connection Service": {
+            "name": "Kafka Connection Service",
+            "displayName": "Kafka Connection Service",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -78,7 +100,36 @@
           "Strict Type Checking": "false",
           "Validation Details Attribute Name": "validation.details"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer for Invalid Records": {
+            "name": "Record Writer for Invalid Records",
+            "displayName": "Record Writer for Invalid Records",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Schema Registry": {
+            "name": "Schema Registry",
+            "displayName": "Schema Registry",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -121,7 +172,29 @@
           "Result RecordPath": "/",
           "customer_id": "/customer_id"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Lookup Service": {
+            "name": "Lookup Service",
+            "displayName": "Lookup Service",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -159,7 +232,22 @@
           "Record Writer": "5b390c25-2c26-5594-8519-6a43225d2b3f",
           "Records Per Split": "1"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -205,7 +293,22 @@
           "Unmatched Column Behavior": "Ignore Unmatched Columns",
           "Maximum Batch Size": "1000"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Database Connection Pooling Service": {
+            "name": "Database Connection Pooling Service",
+            "displayName": "Database Connection Pooling Service",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -248,7 +351,29 @@
           "Publish Strategy": "USE_VALUE",
           "Message Key Field": "order_id"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Kafka Connection Service": {
+            "name": "Kafka Connection Service",
+            "displayName": "Kafka Connection Service",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -437,7 +562,15 @@
           "Message Demarcator": "\n",
           "FlowFile Attribute Header Pattern": "error\\..*|validation\\..*"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Kafka Connection Service": {
+            "name": "Kafka Connection Service",
+            "displayName": "Kafka Connection Service",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -1138,7 +1271,15 @@
           "Schema Registry": "ba2031be-15ab-565b-8802-59e2cb0dc4db",
           "Schema Name": "${schema.name}"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Schema Registry": {
+            "name": "Schema Registry",
+            "displayName": "Schema Registry",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "controllerServiceApis": [
           {
             "type": "org.apache.nifi.serialization.RecordReaderFactory",
@@ -1172,7 +1313,15 @@
           "Schema Registry": "ba2031be-15ab-565b-8802-59e2cb0dc4db",
           "Schema Name": "order.v1"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Schema Registry": {
+            "name": "Schema Registry",
+            "displayName": "Schema Registry",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "controllerServiceApis": [
           {
             "type": "org.apache.nifi.serialization.RecordSetWriterFactory",
@@ -1263,7 +1412,15 @@
           "URL": "#{customers.api}/customers/${customer_id}",
           "Record Reader": "bae2b8f2-a6ef-593f-ba97-6f949b2f55de"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "controllerServiceApis": [
           {
             "type": "org.apache.nifi.lookup.LookupService",

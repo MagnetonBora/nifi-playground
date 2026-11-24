@@ -221,7 +221,15 @@
           "Nullable Fields": "true",
           "Null Value Percentage": "5"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "2 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -262,7 +270,22 @@
           "Strict Type Checking": "true",
           "Validation Details Attribute Name": "validation.details"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -284,7 +307,7 @@
       {
         "identifier": "91f900a6-e9c6-520c-aa78-6d3f873daf69",
         "name": "InvokeHTTP",
-        "comments": "Response -> log, Original (2xx) -> ok.dir, Retry (5xx) / Failure -> RetryFlowFile, No Retry (4xx) -> DLQ",
+        "comments": "Response -> log, Original (2xx) -> ok.dir, Retry (5xx) / Failure -> RetryFlowFile, No Retry (4xx) -> DLQ.\nPenalty Duration 0 sec: InvokeHTTP always penalizes Retry (5xx) FlowFiles, so with the default 30 sec each retry would wait 30 + 10 sec. The backoff lives in RetryFlowFile only.",
         "position": {
           "x": 0,
           "y": 450
@@ -307,7 +330,7 @@
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
         "executionNode": "ALL",
-        "penaltyDuration": "30 sec",
+        "penaltyDuration": "0 sec",
         "yieldDuration": "1 sec",
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
@@ -324,7 +347,7 @@
       {
         "identifier": "812eab16-9224-5960-9700-d720301d3c82",
         "name": "RetryFlowFile",
-        "comments": "Penalty Duration 10 sec = pause before retry",
+        "comments": "Penalty Duration 10 sec = pause before retry (the only backoff: InvokeHTTP Penalty Duration is 0 sec)",
         "position": {
           "x": -450,
           "y": 450
@@ -562,7 +585,7 @@
         },
         "properties": {
           "error.stage": "retries-exceeded",
-          "error.reason": "last status ${invokehttp.status.code}"
+          "error.reason": "last status ${invokehttp.status.code:replaceEmpty(${invokehttp.java.exception.class})}"
         },
         "propertyDescriptors": {},
         "style": {},
@@ -813,7 +836,12 @@
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
         "prioritizers": [],
-        "bends": [],
+        "bends": [
+          {
+            "x": -49,
+            "y": 410
+          }
+        ],
         "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
         "partitioningAttribute": "",
         "loadBalanceCompression": "DO_NOT_COMPRESS",
@@ -879,7 +907,12 @@
         "backPressureDataSizeThreshold": "1 GB",
         "flowFileExpiration": "0 sec",
         "prioritizers": [],
-        "bends": [],
+        "bends": [
+          {
+            "x": -49,
+            "y": 620
+          }
+        ],
         "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
         "partitioningAttribute": "",
         "loadBalanceCompression": "DO_NOT_COMPRESS",

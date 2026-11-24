@@ -1,0 +1,416 @@
+{
+ "uid": "lab9-performance",
+ "title": "Lab 9: Performance test",
+ "tags": [
+  "nifi",
+  "lab"
+ ],
+ "timezone": "browser",
+ "refresh": "5s",
+ "time": {
+  "from": "now-15m",
+  "to": "now"
+ },
+ "schemaVersion": 39,
+ "version": 1,
+ "editable": true,
+ "templating": {
+  "list": []
+ },
+ "panels": [
+  {
+   "id": 1,
+   "type": "text",
+   "title": "About",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 5
+   },
+   "targets": [],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "mode": "markdown",
+    "content": "**Lab 9: performance test** of the group **Lab 9 - Performance test**.\n\n* *Records/s* is the rate of the counter `lab9.records.out` (after `MergeRecord`) over 1 min; Prometheus scrapes every **15 s**, so a run must last at least ~1 min to show up well. The fixed workload of 2,000,000 records takes ~10 s: for a live view run the whole group (generator included) for a few minutes; for exact numbers use `make lab09-measure`.\n* *Invalid / failed* must stay 0: otherwise records are lost and the throughput is not comparable.\n* Queues, threads and CPU per processor come from NiFi status: CPU is a **rolling 5-minute window**."
+   }
+  },
+  {
+   "id": 2,
+   "type": "stat",
+   "title": "Records/s (1 min)",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 5,
+    "w": 8,
+    "h": 5
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "A",
+     "expr": "sum(rate(nifi_processor_counters{counter_name=\"lab9.records.out\"}[1m]))",
+     "legendFormat": "records/s"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "value",
+    "graphMode": "area",
+    "justifyMode": "auto",
+    "orientation": "auto",
+    "textMode": "auto"
+   }
+  },
+  {
+   "id": 3,
+   "type": "stat",
+   "title": "Records delivered (counter)",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 5,
+    "w": 8,
+    "h": 5
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "A",
+     "expr": "sum(nifi_processor_counters{counter_name=\"lab9.records.out\"})",
+     "legendFormat": "lab9.records.out"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto",
+    "orientation": "auto",
+    "textMode": "auto"
+   }
+  },
+  {
+   "id": 4,
+   "type": "stat",
+   "title": "Invalid records / failed FlowFiles",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 5,
+    "w": 8,
+    "h": 5
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "A",
+     "expr": "sum by (counter_name) (nifi_processor_counters{counter_name=~\"lab9.records.invalid|lab9.flowfiles.failed\"})",
+     "legendFormat": "{{counter_name}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "colorMode": "value",
+    "graphMode": "none",
+    "justifyMode": "auto",
+    "orientation": "auto",
+    "textMode": "auto"
+   }
+  },
+  {
+   "id": 5,
+   "type": "timeseries",
+   "title": "Records/s",
+   "description": "Rate of lab9.records.out over 1 min",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 10,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "A",
+     "expr": "sum(rate(nifi_processor_counters{counter_name=\"lab9.records.out\"}[1m]))",
+     "legendFormat": "delivered"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {}
+  },
+  {
+   "id": 6,
+   "type": "timeseries",
+   "title": "FlowFiles queued in front of each processor",
+   "description": "A queue that stays long in front of a processor marks the bottleneck",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 10,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "A",
+     "expr": "nifi_amount_items_queued{component_type=\"Connection\"} * on(parent_id) group_left() label_replace(0 * nifi_amount_items_queued{component_type=\"ProcessGroup\", component_name=\"Lab 9 - Performance test\"} + 1, \"parent_id\", \"$1\", \"component_id\", \"(.*)\")",
+     "legendFormat": "{{destination_name}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {}
+  },
+  {
+   "id": 7,
+   "type": "timeseries",
+   "title": "Active threads per processor",
+   "description": "Threads running at the scrape moment; the bottleneck is busy all the time",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 18,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "A",
+     "expr": "nifi_amount_threads_active{component_type=\"Processor\"} * on(parent_id) group_left() label_replace(0 * nifi_amount_items_queued{component_type=\"ProcessGroup\", component_name=\"Lab 9 - Performance test\"} + 1, \"parent_id\", \"$1\", \"component_id\", \"(.*)\")",
+     "legendFormat": "{{component_name}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {}
+  },
+  {
+   "id": 8,
+   "type": "timeseries",
+   "title": "CPU time per processor (5-min window)",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 18,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "A",
+     "expr": "nifi_processing_performance_cpu_duration{component_type=\"Processor\"} * on(parent_id) group_left() label_replace(0 * nifi_amount_items_queued{component_type=\"ProcessGroup\", component_name=\"Lab 9 - Performance test\"} + 1, \"parent_id\", \"$1\", \"component_id\", \"(.*)\")",
+     "legendFormat": "{{component_name}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ms"
+    },
+    "overrides": []
+   },
+   "options": {}
+  },
+  {
+   "id": 9,
+   "type": "timeseries",
+   "title": "JVM heap",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 26,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "A",
+     "expr": "nifi_jvm_heap_used",
+     "legendFormat": "used"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "B",
+     "expr": "nifi_jvm_heap_committed",
+     "legendFormat": "committed"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes"
+    },
+    "overrides": []
+   },
+   "options": {}
+  },
+  {
+   "id": 10,
+   "type": "timeseries",
+   "title": "GC time per minute",
+   "description": "",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 26,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "prometheus"
+     },
+     "refId": "A",
+     "expr": "increase(nifi_jvm_gc_time[1m])",
+     "legendFormat": "{{gc_name}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ms"
+    },
+    "overrides": []
+   },
+   "options": {}
+  }
+ ]
+}

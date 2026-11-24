@@ -1,6 +1,13 @@
 nifi/certs/
 nifi/data/
+# Generated lab reports (make lab08-measure)
+labs/
+
+*.pyc
 
 # Splunk: settings changed in the UI for the playground app
 splunk/apps/nifi_playground/local/
 splunk/apps/nifi_playground/metadata/local.meta
+
+# Custom NARs dropped in for auto-loading (nifi/extensions/README.md)
+nifi/extensions/*.nar

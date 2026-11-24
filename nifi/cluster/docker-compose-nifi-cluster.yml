@@ -115,6 +115,7 @@ services:
       - nifi1_logs:/opt/nifi/nifi-current/logs
       - ../data:/opt/nifi/data
       - ../drivers:/opt/nifi/drivers:ro
+      - ../extensions:/opt/nifi/nifi-current/nar_extensions   # custom NARs (auto-loaded)
 
   nifi2:
     <<: *nifi-common
@@ -139,6 +140,7 @@ services:
       - nifi2_logs:/opt/nifi/nifi-current/logs
       - ../data:/opt/nifi/data
       - ../drivers:/opt/nifi/drivers:ro
+      - ../extensions:/opt/nifi/nifi-current/nar_extensions   # custom NARs (auto-loaded)
 
   nifi3:
     <<: *nifi-common
@@ -163,6 +165,7 @@ services:
       - nifi3_logs:/opt/nifi/nifi-current/logs
       - ../data:/opt/nifi/data
       - ../drivers:/opt/nifi/drivers:ro
+      - ../extensions:/opt/nifi/nifi-current/nar_extensions   # custom NARs (auto-loaded)
 
 
   # Tool (not started by `up`): waits for NiFi, then grants admin / nodes / prometheus policies.

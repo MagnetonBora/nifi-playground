@@ -11,7 +11,8 @@ Each file is a single Process Group with its own Parameter Context holding the p
 | `lab4-db-basics.json` | Lab 4: connecting to a database (read, incremental read, write) |
 | `lab5-db-rest-kafka.json` | Lab 5: DB + REST + Kafka |
 | `lab6-ndjson-pipeline.json` | Lab 6: NDJSON transformation pipeline |
-| `lab7-splunk-delivery.json` | Lab 7: delivery to Splunk |
+| `lab7-splunk-delivery-mock.json` | Lab 7: delivery to Splunk, splunk-sim stub (`make lab-services`, check `make lab-splunk-count`) |
+| `lab7-splunk-delivery-splunk.json` | Lab 7: delivery to real Splunk (`make splunk`, check `index=nifi` at http://localhost:8000) |
 | `lab8-retry-errors.json` | Lab 8: retries and error handling |
 | `lab9-performance.json` | Lab 9: performance test |
 | `lab10-final-pipeline.json` | Final lab (Block 3.5) |

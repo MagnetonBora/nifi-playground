@@ -81,6 +81,8 @@ services:
       - nifi_logs:/opt/nifi/nifi-current/logs
       - ../data:/opt/nifi/data
       - ../drivers:/opt/nifi/drivers:ro
+      # Custom NARs: drop *.nar into nifi/extensions on the host, NiFi auto-loads them (no restart)
+      - ../extensions:/opt/nifi/nifi-current/nar_extensions
     healthcheck:
       test: ["CMD-SHELL", "curl -kfs https://$$(hostname):8443/nifi/ > /dev/null || exit 1"]
       interval: 30s

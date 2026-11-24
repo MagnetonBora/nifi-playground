@@ -1,4 +1,4 @@
-"""Splunk emulator for Lab 7 and the final lab.
+"""Splunk emulator for Lab 7.
 
   TCP  :5514  newline-delimited events -> /data/splunk_in.log   (PutSplunk)
   HTTP :8088  POST /services/collector/event (HEC) -> /data/hec_in.log, replies like Splunk   (InvokeHTTP)

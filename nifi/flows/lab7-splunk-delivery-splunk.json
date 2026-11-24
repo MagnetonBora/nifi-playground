@@ -1,8 +1,8 @@
 {
   "flowContents": {
     "identifier": "a846f307-a17a-5549-9ef2-2623f89e9be1",
-    "name": "Lab 7 - Splunk delivery",
-    "comments": "Event generator -> MergeRecord -> PutSplunk (TCP) or InvokeHTTP (HEC). Check: make lab-splunk-count",
+    "name": "Lab 7 - Splunk delivery (real Splunk)",
+    "comments": "Event generator -> MergeRecord -> PutSplunk (TCP) or InvokeHTTP (HEC) into real Splunk. Requires: make splunk. Check: http://localhost:8000, search index=nifi",
     "position": {
       "x": 0,
       "y": 0
@@ -38,7 +38,15 @@
               "Number of Records": "100",
               "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"GeneratedLogEvent\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Level\",\n        \"symbols\": [\n          \"INFO\",\n          \"WARN\",\n          \"ERROR\",\n          \"DEBUG\"\n        ]\n      }\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": {\n        \"type\": \"record\",\n        \"name\": \"GenUser\",\n        \"fields\": [\n          {\n            \"name\": \"id\",\n            \"type\": \"long\"\n          },\n          {\n            \"name\": \"pwd\",\n            \"type\": \"string\"\n          }\n        ]\n      }\n    }\n  ]\n}"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "1 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -78,7 +86,22 @@
               "Maximum Number of Records": "10000",
               "Max Bin Age": "10 sec"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -103,7 +126,7 @@
           {
             "identifier": "912890c8-8811-52a8-b159-fd243c7ffb56",
             "name": "PutSplunk",
-            "comments": "Variant 3: Concurrent Tasks = 2, 4.\nReal Splunk (make splunk): in lab7-params set splunk.host = splunk (instead of splunk-sim); port 5514 stays. Search in http://localhost:8000: index=nifi",
+            "comments": "Variant 3: Concurrent Tasks = 2, 4.\nReal Splunk TCP input splunk:5514 (index=nifi, sourcetype nifi:json).",
             "position": {
               "x": 0,
               "y": 400
@@ -296,7 +319,7 @@
         "flowFileConcurrency": "UNBOUNDED",
         "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
         "componentType": "PROCESS_GROUP",
-        "parameterContextName": "lab7-params",
+        "parameterContextName": "lab7-params-splunk",
         "groupIdentifier": "a846f307-a17a-5549-9ef2-2623f89e9be1"
       },
       {
@@ -329,7 +352,15 @@
               "Number of Records": "100",
               "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"GeneratedLogEvent\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Level\",\n        \"symbols\": [\n          \"INFO\",\n          \"WARN\",\n          \"ERROR\",\n          \"DEBUG\"\n        ]\n      }\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": {\n        \"type\": \"record\",\n        \"name\": \"GenUser\",\n        \"fields\": [\n          {\n            \"name\": \"id\",\n            \"type\": \"long\"\n          },\n          {\n            \"name\": \"pwd\",\n            \"type\": \"string\"\n          }\n        ]\n      }\n    }\n  ]\n}"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "1 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -369,7 +400,22 @@
               "Maximum Number of Records": "10000",
               "Max Bin Age": "10 sec"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -394,7 +440,7 @@
           {
             "identifier": "435379b0-c7e3-51f6-836b-26e55dcab227",
             "name": "InvokeHTTP",
-            "comments": "The dynamic Authorization property becomes an HTTP header.\nReal Splunk (make splunk): in lab7-params set hec.url = http://splunk:8088/services/collector/raw (/event would need each event wrapped in {\"event\": ...}). Search in http://localhost:8000: index=nifi",
+            "comments": "The dynamic Authorization property becomes an HTTP header.\nHEC /raw: NDJSON, one event per line. /event would need each event wrapped in {\"event\": ...} and answers 400 {\"text\":\"No data\",\"code\":5} otherwise.",
             "position": {
               "x": 0,
               "y": 400
@@ -590,7 +636,7 @@
         "flowFileConcurrency": "UNBOUNDED",
         "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
         "componentType": "PROCESS_GROUP",
-        "parameterContextName": "lab7-params",
+        "parameterContextName": "lab7-params-splunk",
         "groupIdentifier": "a846f307-a17a-5549-9ef2-2623f89e9be1"
       }
     ],
@@ -675,18 +721,18 @@
     "flowFileConcurrency": "UNBOUNDED",
     "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
     "componentType": "PROCESS_GROUP",
-    "parameterContextName": "lab7-params"
+    "parameterContextName": "lab7-params-splunk"
   },
   "externalControllerServices": {},
   "parameterContexts": {
-    "lab7-params": {
-      "name": "lab7-params",
-      "description": "Lab 7: Splunk emulator (lab-services)",
+    "lab7-params-splunk": {
+      "name": "lab7-params-splunk",
+      "description": "Lab 7: real Splunk (make splunk)",
       "parameters": [
         {
           "name": "splunk.host",
-          "value": "splunk-sim",
-          "description": "Emulator TCP input / HEC",
+          "value": "splunk",
+          "description": "Splunk TCP input host",
           "sensitive": false,
           "provided": false
         },
@@ -699,8 +745,8 @@
         },
         {
           "name": "hec.url",
-          "value": "http://splunk-sim:8088/services/collector/event",
-          "description": "HEC endpoint",
+          "value": "http://splunk:8088/services/collector/raw",
+          "description": "HEC raw endpoint (NDJSON, one event per line)",
           "sensitive": false,
           "provided": false
         },

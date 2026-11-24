@@ -2,7 +2,7 @@
   "flowContents": {
     "identifier": "4cc07515-38a5-530f-98c0-c514e6538b36",
     "name": "Lab 9 - Performance test",
-    "comments": "Lab 6 pipeline under load. Scenario A (baseline): Reader with Infer Schema. B: switch the Record Reader to r-log-explicit. C-F: Concurrent Tasks, batch size, heap. Counter lab9.records.out: Counters menu",
+    "comments": "Lab 6 pipeline under load. Fixed workload: 200 FlowFiles x 10,000 records wait in front of ValidateRecord. Scenarios: A Reader with Infer Schema; B reader-input-schema; C Concurrent Tasks at the bottleneck; D larger MergeRecord batches. Counters (menu -> Counters): lab9.records.out, lab9.records.invalid, lab9.flowfiles.failed. make lab09-measure runs A-D automatically.",
     "position": {
       "x": 0,
       "y": 0
@@ -13,7 +13,7 @@
       {
         "identifier": "5892860c-7082-5ec9-a3a0-819513a58cca",
         "name": "GenerateRecord",
-        "comments": "Load: 10,000 events/sec. Increase Number of Records or decrease Run Schedule",
+        "comments": "Load: 10,000 records per FlowFile, as fast as the pipeline accepts them. The connection to ValidateRecord holds at most 200 FlowFiles (back pressure; ~0.37 GB) = 2,000,000 records: run the generator alone to prepare a fixed workload, then stop it and start the rest.",
         "position": {
           "x": 0,
           "y": 0
@@ -29,9 +29,17 @@
           "Number of Records": "10000",
           "Schema Text": "{\n  \"type\": \"record\",\n  \"name\": \"GeneratedLogEvent\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": {\n        \"type\": \"enum\",\n        \"name\": \"Level\",\n        \"symbols\": [\n          \"INFO\",\n          \"WARN\",\n          \"ERROR\",\n          \"DEBUG\"\n        ]\n      }\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": {\n        \"type\": \"record\",\n        \"name\": \"GenUser\",\n        \"fields\": [\n          {\n            \"name\": \"id\",\n            \"type\": \"long\"\n          },\n          {\n            \"name\": \"pwd\",\n            \"type\": \"string\"\n          }\n        ]\n      }\n    }\n  ]\n}"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
-        "schedulingPeriod": "1 sec",
+        "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
         "executionNode": "PRIMARY",
         "penaltyDuration": "30 sec",
@@ -51,7 +59,7 @@
       {
         "identifier": "fd5f1ad2-6cc0-5ba7-b233-2352ea3426cb",
         "name": "ValidateRecord",
-        "comments": "Scenario B: Record Reader -> r-log-explicit",
+        "comments": "Scenario A: Record Reader reader-inferred-schema (Infer Schema). Scenario B: reader-input-schema. Validation itself always uses the explicit schema #{log.schema.in}.",
         "position": {
           "x": 0,
           "y": 200
@@ -69,7 +77,22 @@
           "Schema Text": "#{log.schema.in}",
           "Strict Type Checking": "true"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -79,10 +102,7 @@
         "bulletinLevel": "WARN",
         "runDurationMillis": 0,
         "concurrentlySchedulableTaskCount": 1,
-        "autoTerminatedRelationships": [
-          "invalid",
-          "failure"
-        ],
+        "autoTerminatedRelationships": [],
         "scheduledState": "ENABLED",
         "retryCount": 10,
         "retriedRelationships": [],
@@ -111,7 +131,22 @@
           "Replacement Value Strategy": "literal-value",
           "/ingest_ts": "${now():format(\"yyyy-MM-dd'T'HH:mm:ss.SSSXXX\", \"UTC\")}"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -135,7 +170,7 @@
       {
         "identifier": "947680f3-1545-5c36-98cb-ba9d0437f63e",
         "name": "MergeRecord",
-        "comments": "Scenario D: batch size",
+        "comments": "Scenario D: batch size (Minimum / Maximum Number of Records). Max Bin Age 1 sec: at this load the bins fill by size in a fraction of a second; the age only flushes the last, incomplete bin at the end of a run.",
         "position": {
           "x": 0,
           "y": 600
@@ -151,9 +186,24 @@
           "Record Writer": "34898a0b-30c0-5fcf-9a75-dd0b186b0506",
           "Minimum Number of Records": "10000",
           "Maximum Number of Records": "50000",
-          "Max Bin Age": "10 sec"
+          "Max Bin Age": "1 sec"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Record Reader": {
+            "name": "Record Reader",
+            "displayName": "Record Reader",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          },
+          "Record Writer": {
+            "name": "Record Writer",
+            "displayName": "Record Writer",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "style": {},
         "schedulingPeriod": "0 sec",
         "schedulingStrategy": "TIMER_DRIVEN",
@@ -287,6 +337,84 @@
         "maxBackoffPeriod": "10 mins",
         "componentType": "PROCESSOR",
         "groupIdentifier": "4cc07515-38a5-530f-98c0-c514e6538b36"
+      },
+      {
+        "identifier": "68ca8377-ec1c-5a1d-ab67-53e25ef3b01e",
+        "name": "count invalid",
+        "comments": "Records rejected by ValidateRecord",
+        "position": {
+          "x": 450,
+          "y": 200
+        },
+        "type": "org.apache.nifi.processors.standard.UpdateCounter",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Counter Name": "lab9.records.invalid",
+          "Delta": "${record.count}"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [
+          "success"
+        ],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "4cc07515-38a5-530f-98c0-c514e6538b36"
+      },
+      {
+        "identifier": "be8c4936-fe0f-5456-8481-fa1f3cb3d69c",
+        "name": "count failed",
+        "comments": "FlowFiles that ValidateRecord could not read",
+        "position": {
+          "x": 450,
+          "y": 350
+        },
+        "type": "org.apache.nifi.processors.standard.UpdateCounter",
+        "bundle": {
+          "group": "org.apache.nifi",
+          "artifact": "nifi-standard-nar",
+          "version": "2.12.0"
+        },
+        "properties": {
+          "Counter Name": "lab9.flowfiles.failed",
+          "Delta": "1"
+        },
+        "propertyDescriptors": {},
+        "style": {},
+        "schedulingPeriod": "0 sec",
+        "schedulingStrategy": "TIMER_DRIVEN",
+        "executionNode": "ALL",
+        "penaltyDuration": "30 sec",
+        "yieldDuration": "1 sec",
+        "bulletinLevel": "WARN",
+        "runDurationMillis": 0,
+        "concurrentlySchedulableTaskCount": 1,
+        "autoTerminatedRelationships": [
+          "success"
+        ],
+        "scheduledState": "ENABLED",
+        "retryCount": 10,
+        "retriedRelationships": [],
+        "backoffMechanism": "PENALIZE_FLOWFILE",
+        "maxBackoffPeriod": "10 mins",
+        "componentType": "PROCESSOR",
+        "groupIdentifier": "4cc07515-38a5-530f-98c0-c514e6538b36"
       }
     ],
     "inputPorts": [],
@@ -294,7 +422,7 @@
     "connections": [
       {
         "identifier": "0bf41754-318a-57fa-9bb2-549905ae1aff",
-        "name": "",
+        "name": "workload: 200 FlowFiles = 2,000,000 records",
         "source": {
           "id": "5892860c-7082-5ec9-a3a0-819513a58cca",
           "type": "PROCESSOR",
@@ -314,8 +442,8 @@
         "selectedRelationships": [
           "success"
         ],
-        "backPressureObjectThreshold": 10000,
-        "backPressureDataSizeThreshold": "1 GB",
+        "backPressureObjectThreshold": 200,
+        "backPressureDataSizeThreshold": "2 GB",
         "flowFileExpiration": "0 sec",
         "prioritizers": [],
         "bends": [],
@@ -489,6 +617,72 @@
         "loadBalanceCompression": "DO_NOT_COMPRESS",
         "componentType": "CONNECTION",
         "groupIdentifier": "4cc07515-38a5-530f-98c0-c514e6538b36"
+      },
+      {
+        "identifier": "4dde5b91-e5fa-5d2f-b6e0-58bb7198e341",
+        "name": "",
+        "source": {
+          "id": "fd5f1ad2-6cc0-5ba7-b233-2352ea3426cb",
+          "type": "PROCESSOR",
+          "groupId": "4cc07515-38a5-530f-98c0-c514e6538b36",
+          "name": "ValidateRecord",
+          "comments": ""
+        },
+        "destination": {
+          "id": "68ca8377-ec1c-5a1d-ab67-53e25ef3b01e",
+          "type": "PROCESSOR",
+          "groupId": "4cc07515-38a5-530f-98c0-c514e6538b36",
+          "name": "count invalid",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [
+          "invalid"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "4cc07515-38a5-530f-98c0-c514e6538b36"
+      },
+      {
+        "identifier": "3c195058-99b0-5e75-9ac4-566f5b2fbd34",
+        "name": "",
+        "source": {
+          "id": "fd5f1ad2-6cc0-5ba7-b233-2352ea3426cb",
+          "type": "PROCESSOR",
+          "groupId": "4cc07515-38a5-530f-98c0-c514e6538b36",
+          "name": "ValidateRecord",
+          "comments": ""
+        },
+        "destination": {
+          "id": "be8c4936-fe0f-5456-8481-fa1f3cb3d69c",
+          "type": "PROCESSOR",
+          "groupId": "4cc07515-38a5-530f-98c0-c514e6538b36",
+          "name": "count failed",
+          "comments": ""
+        },
+        "labelIndex": 1,
+        "zIndex": 0,
+        "selectedRelationships": [
+          "failure"
+        ],
+        "backPressureObjectThreshold": 10000,
+        "backPressureDataSizeThreshold": "1 GB",
+        "flowFileExpiration": "0 sec",
+        "prioritizers": [],
+        "bends": [],
+        "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+        "partitioningAttribute": "",
+        "loadBalanceCompression": "DO_NOT_COMPRESS",
+        "componentType": "CONNECTION",
+        "groupIdentifier": "4cc07515-38a5-530f-98c0-c514e6538b36"
       }
     ],
     "labels": [],
@@ -496,7 +690,7 @@
     "controllerServices": [
       {
         "identifier": "edc39a61-608a-58e3-bcd9-896749a22174",
-        "name": "r-log-infer",
+        "name": "reader-inferred-schema",
         "comments": "",
         "type": "org.apache.nifi.json.JsonTreeReader",
         "bundle": {
@@ -525,7 +719,7 @@
       },
       {
         "identifier": "dff37eb2-6cb5-58ad-afba-612b305eb274",
-        "name": "r-log-explicit",
+        "name": "reader-input-schema",
         "comments": "",
         "type": "org.apache.nifi.json.JsonTreeReader",
         "bundle": {
@@ -555,7 +749,7 @@
       },
       {
         "identifier": "c9856761-720c-5ac9-a564-057a27b7b928",
-        "name": "r-log-out",
+        "name": "reader-output-schema",
         "comments": "",
         "type": "org.apache.nifi.json.JsonTreeReader",
         "bundle": {
@@ -585,7 +779,7 @@
       },
       {
         "identifier": "34898a0b-30c0-5fcf-9a75-dd0b186b0506",
-        "name": "w-log",
+        "name": "writer-output-schema",
         "comments": "",
         "type": "org.apache.nifi.json.JsonRecordSetWriter",
         "bundle": {
@@ -618,7 +812,7 @@
       },
       {
         "identifier": "1e8afd3b-e5d4-50c6-9dd8-fe35fb0e4523",
-        "name": "w-gen-ndjson",
+        "name": "writer-as-is",
         "comments": "",
         "type": "org.apache.nifi.json.JsonRecordSetWriter",
         "bundle": {

@@ -65,6 +65,8 @@ Reference solutions for all workshop labs are in [nifi/flows](nifi/flows/README.
 make import f=nifi/flows/lab5-db-rest-kafka.json   # import a flow into the single NiFi
 make import-cluster f=nifi/flows/<file>.json        # same for the cluster
 make lab03-measure                                  # Lab 3 measurements: split vs record
+make lab08-measure                                  # Lab 8 measurements on the imported group: retries, DLQ, API outage (~9 min, .txt + .html)
+make lab09-measure                                  # Lab 9 measurements on the imported group: scenarios A-D, 3 runs each (~6 min, .txt + .html)
 make lab4-insert n=10                               # new rows for the incremental read in Lab 4
 make lab05-data                                     # test orders for Lab 5
 make lab-final-load n=100000                        # load for the final lab
@@ -85,6 +87,7 @@ nifi/
   certs/                  CA and certificates (generated automatically, not committed to git)
   data/                   = /opt/nifi/data on all NiFi nodes (lab inputs and outputs)
   drivers/                = /opt/nifi/drivers (JDBC drivers; PostgreSQL is already included)
+  extensions/             = nar_extensions on all NiFi nodes (custom processor NARs, auto-loaded)
 kafka/                    Kafka + Conduktor
 postgres/                 PostgreSQL + pgAdmin; init/ — lab tables, pgadmin/ — playground server
 monitoring/prometheus/    Prometheus, kafka-exporter, prometheus.yml
@@ -108,6 +111,8 @@ Each compose file is named `docker-compose-<name>.yml` and lives in its stack's 
   logging in again. Port `8081` (ListenHTTP) is exposed only for the single NiFi.
 - **Drivers.** To add a JDBC driver, just drop it into `nifi/drivers` and set the path
   `/opt/nifi/drivers/<file>.jar` in `DBCPConnectionPool` — no restart required.
+- **Custom NARs.** Drop a `*.nar` into `nifi/extensions`. Every NiFi node (single and cluster) auto-loads it
+  within ~30 seconds, no restart required. NAR files are not committed to git.
 - **Re-running Kafka labs.** The consumer group remembers consumed messages; reset it before re-running,
   for example
   `docker exec kafka1 kafka-consumer-groups --bootstrap-server kafka1:19092 --delete --group nifi-lab05`.

@@ -90,7 +90,29 @@
               "Strict Type Checking": "true",
               "Validation Details Attribute Name": "validation.details"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer for Invalid Records": {
+                "name": "Record Writer for Invalid Records",
+                "displayName": "Record Writer for Invalid Records",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -129,7 +151,22 @@
               "Replacement Value Strategy": "literal-value",
               "/ingest_ts": "${now():format(\"yyyy-MM-dd'T'HH:mm:ss.SSSXXX\", \"UTC\")}"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -171,7 +208,22 @@
               "Maximum Number of Records": "10000",
               "Max Bin Age": "30 sec"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -669,7 +721,29 @@
               "Strict Type Checking": "true",
               "Validation Details Attribute Name": "validation.details"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer for Invalid Records": {
+                "name": "Record Writer for Invalid Records",
+                "displayName": "Record Writer for Invalid Records",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -745,7 +819,22 @@
               "Jolt Specification": "[\n  {\n    \"operation\": \"remove\",\n    \"spec\": {\n      \"user\": {\n        \"pwd\": \"\"\n      }\n    }\n  },\n  {\n    \"operation\": \"shift\",\n    \"spec\": {\n      \"#${ingest.ts}\": \"ingest_ts\",\n      \"*\": \"&\"\n    }\n  }\n]",
               "Transform Cache Size": "10"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -769,7 +858,7 @@
           {
             "identifier": "de1922b2-0966-5150-ae9c-2d76932eabe8",
             "name": "MergeRecord",
-            "comments": "Infer Schema + w-raw: the output shape comes only from Jolt",
+            "comments": "Infer Schema + writer-as-is - the output shape comes only from Jolt",
             "position": {
               "x": 0,
               "y": 800
@@ -787,7 +876,22 @@
               "Maximum Number of Records": "10000",
               "Max Bin Age": "30 sec"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -1269,7 +1373,7 @@
         "controllerServices": [
           {
             "identifier": "991af1bf-c5e9-5a59-a02f-3bac7e7bdca6",
-            "name": "r-infer",
+            "name": "reader-inferred-schema",
             "comments": "",
             "type": "org.apache.nifi.json.JsonTreeReader",
             "bundle": {
@@ -1310,7 +1414,7 @@
     "controllerServices": [
       {
         "identifier": "8c579e31-f6f3-5b8f-9a16-d8df27f21104",
-        "name": "r-log",
+        "name": "reader-input-schema",
         "comments": "",
         "type": "org.apache.nifi.json.JsonTreeReader",
         "bundle": {
@@ -1340,7 +1444,7 @@
       },
       {
         "identifier": "d110fe1b-deb9-532c-aebe-234688b0f819",
-        "name": "r-log-out",
+        "name": "reader-output-schema",
         "comments": "",
         "type": "org.apache.nifi.json.JsonTreeReader",
         "bundle": {
@@ -1370,7 +1474,7 @@
       },
       {
         "identifier": "7682034b-2d24-5fc4-98cf-895614ae18e1",
-        "name": "w-log",
+        "name": "writer-output-schema",
         "comments": "",
         "type": "org.apache.nifi.json.JsonRecordSetWriter",
         "bundle": {
@@ -1403,7 +1507,7 @@
       },
       {
         "identifier": "cb196bb8-1f13-5e79-9375-bebfb2d97b4e",
-        "name": "w-raw",
+        "name": "writer-as-is",
         "comments": "",
         "type": "org.apache.nifi.json.JsonRecordSetWriter",
         "bundle": {

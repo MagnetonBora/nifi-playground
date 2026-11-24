@@ -2,7 +2,7 @@
   "flowContents": {
     "identifier": "65f9af82-ca8e-5dff-97b2-1e0c13ed8473",
     "name": "Final lab - End-to-end pipeline",
-    "comments": "logs.raw -> validate-transform -> deliver (Splunk) -> errors (logs.dlq). Load: make lab-final-load n=100000. Reconciliation: Counters final.*",
+    "comments": "logs.raw -> validate-transform -> deliver (Kafka logs.clean) -> errors (logs.dlq). Load: make lab-final-load n=100000. Reconciliation: Counters final.* (accepted = delivered + filtered.debug + dlq)",
     "position": {
       "x": 0,
       "y": 0
@@ -43,7 +43,29 @@
               "Record Writer": "d7348cfa-8e76-5366-a4de-8477829d81e6",
               "Output Strategy": "USE_VALUE"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Kafka Connection Service": {
+                "name": "Kafka Connection Service",
+                "displayName": "Kafka Connection Service",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -351,7 +373,22 @@
               "Strict Type Checking": "true",
               "Validation Details Attribute Name": "error.details"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -390,7 +427,22 @@
               "Replacement Value Strategy": "literal-value",
               "/ingest_ts": "${now():format(\"yyyy-MM-dd'T'HH:mm:ss.SSSXXX\", \"UTC\")}"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -430,7 +482,22 @@
               "debug": "SELECT * FROM FLOWFILE WHERE level = 'DEBUG'",
               "Include Zero Record FlowFiles": "false"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -511,7 +578,22 @@
               "Maximum Number of Records": "10000",
               "Max Bin Age": "30 sec"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -1001,7 +1083,7 @@
       {
         "identifier": "f2cc98a2-5654-5028-805b-7134e83a2fc0",
         "name": "deliver",
-        "comments": "PutSplunk (TCP) with framework retry and RetryFlowFile",
+        "comments": "PublishKafka (logs.clean) with RetryFlowFile; final.delivered after success",
         "position": {
           "x": 0,
           "y": 700
@@ -1012,10 +1094,10 @@
           {
             "identifier": "e8b79109-f307-54af-9301-d509cb9fde5e",
             "name": "UpdateCounter",
-            "comments": "",
+            "comments": "After a successful publish: counts records that reached logs.clean",
             "position": {
               "x": 0,
-              "y": 200
+              "y": 450
             },
             "type": "org.apache.nifi.processors.standard.UpdateCounter",
             "bundle": {
@@ -1037,7 +1119,9 @@
             "bulletinLevel": "WARN",
             "runDurationMillis": 0,
             "concurrentlySchedulableTaskCount": 1,
-            "autoTerminatedRelationships": [],
+            "autoTerminatedRelationships": [
+              "success"
+            ],
             "scheduledState": "ENABLED",
             "retryCount": 10,
             "retriedRelationships": [],
@@ -1048,42 +1132,62 @@
           },
           {
             "identifier": "91236939-04e9-5d3b-b5a4-85d8d06dbf6b",
-            "name": "PutSplunk",
-            "comments": "framework retry on failure (3 attempts), then RetryFlowFile",
+            "name": "PublishKafka (logs.clean)",
+            "comments": "Delivery. failure -> RetryFlowFile (the only retry; Penalty Duration 0 sec here). success -> final.delivered: the counter counts what Kafka accepted, not attempts.",
             "position": {
               "x": 0,
-              "y": 400
+              "y": 200
             },
-            "type": "org.apache.nifi.processors.splunk.PutSplunk",
+            "type": "org.apache.nifi.kafka.processors.PublishKafka",
             "bundle": {
               "group": "org.apache.nifi",
-              "artifact": "nifi-splunk-nar",
+              "artifact": "nifi-kafka-nar",
               "version": "2.12.0"
             },
             "properties": {
-              "Hostname": "#{splunk.host}",
-              "Port": "#{splunk.port}",
-              "Protocol": "TCP",
-              "Message Delimiter": "\\n"
+              "Kafka Connection Service": "b61d077a-227f-5036-8625-c2a177a7bdd3",
+              "Topic Name": "#{out.topic}",
+              "Record Reader": "7c28570a-f9e5-5056-9611-238959bc34cb",
+              "Record Writer": "0d44f511-394f-5f25-8559-c5ce2e7c0e62",
+              "Publish Strategy": "USE_VALUE",
+              "Message Key Field": "id"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Kafka Connection Service": {
+                "name": "Kafka Connection Service",
+                "displayName": "Kafka Connection Service",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Reader": {
+                "name": "Record Reader",
+                "displayName": "Record Reader",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              },
+              "Record Writer": {
+                "name": "Record Writer",
+                "displayName": "Record Writer",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
             "executionNode": "ALL",
-            "penaltyDuration": "30 sec",
+            "penaltyDuration": "0 sec",
             "yieldDuration": "1 sec",
             "bulletinLevel": "WARN",
             "runDurationMillis": 0,
             "concurrentlySchedulableTaskCount": 1,
-            "autoTerminatedRelationships": [
-              "success"
-            ],
+            "autoTerminatedRelationships": [],
             "scheduledState": "ENABLED",
-            "retryCount": 3,
-            "retriedRelationships": [
-              "failure"
-            ],
+            "retryCount": 10,
+            "retriedRelationships": [],
             "backoffMechanism": "PENALIZE_FLOWFILE",
             "maxBackoffPeriod": "10 mins",
             "componentType": "PROCESSOR",
@@ -1092,10 +1196,10 @@
           {
             "identifier": "6552551d-6bc4-51f6-8d4e-9615b62619e3",
             "name": "RetryFlowFile",
-            "comments": "",
+            "comments": "5 retries, 10 sec apart (Penalty Duration), then the DLQ: ~1 min after the destination stops accepting",
             "position": {
               "x": 450,
-              "y": 400
+              "y": 200
             },
             "type": "org.apache.nifi.processors.standard.RetryFlowFile",
             "bundle": {
@@ -1132,7 +1236,7 @@
             "comments": "",
             "position": {
               "x": 450,
-              "y": 650
+              "y": 450
             },
             "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
             "bundle": {
@@ -1209,10 +1313,10 @@
               "comments": ""
             },
             "destination": {
-              "id": "e8b79109-f307-54af-9301-d509cb9fde5e",
+              "id": "91236939-04e9-5d3b-b5a4-85d8d06dbf6b",
               "type": "PROCESSOR",
               "groupId": "f2cc98a2-5654-5028-805b-7134e83a2fc0",
-              "name": "UpdateCounter",
+              "name": "PublishKafka (logs.clean)",
               "comments": ""
             },
             "labelIndex": 1,
@@ -1233,17 +1337,17 @@
             "identifier": "b809e8b1-5320-5937-bd58-d9882c6a931d",
             "name": "",
             "source": {
+              "id": "91236939-04e9-5d3b-b5a4-85d8d06dbf6b",
+              "type": "PROCESSOR",
+              "groupId": "f2cc98a2-5654-5028-805b-7134e83a2fc0",
+              "name": "PublishKafka (logs.clean)",
+              "comments": ""
+            },
+            "destination": {
               "id": "e8b79109-f307-54af-9301-d509cb9fde5e",
               "type": "PROCESSOR",
               "groupId": "f2cc98a2-5654-5028-805b-7134e83a2fc0",
               "name": "UpdateCounter",
-              "comments": ""
-            },
-            "destination": {
-              "id": "91236939-04e9-5d3b-b5a4-85d8d06dbf6b",
-              "type": "PROCESSOR",
-              "groupId": "f2cc98a2-5654-5028-805b-7134e83a2fc0",
-              "name": "PutSplunk",
               "comments": ""
             },
             "labelIndex": 1,
@@ -1269,7 +1373,7 @@
               "id": "91236939-04e9-5d3b-b5a4-85d8d06dbf6b",
               "type": "PROCESSOR",
               "groupId": "f2cc98a2-5654-5028-805b-7134e83a2fc0",
-              "name": "PutSplunk",
+              "name": "PublishKafka (logs.clean)",
               "comments": ""
             },
             "destination": {
@@ -1288,7 +1392,12 @@
             "backPressureDataSizeThreshold": "1 GB",
             "flowFileExpiration": "0 sec",
             "prioritizers": [],
-            "bends": [],
+            "bends": [
+              {
+                "x": 400,
+                "y": 180
+              }
+            ],
             "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
             "partitioningAttribute": "",
             "loadBalanceCompression": "DO_NOT_COMPRESS",
@@ -1309,7 +1418,7 @@
               "id": "91236939-04e9-5d3b-b5a4-85d8d06dbf6b",
               "type": "PROCESSOR",
               "groupId": "f2cc98a2-5654-5028-805b-7134e83a2fc0",
-              "name": "PutSplunk",
+              "name": "PublishKafka (logs.clean)",
               "comments": ""
             },
             "labelIndex": 1,
@@ -1321,7 +1430,12 @@
             "backPressureDataSizeThreshold": "1 GB",
             "flowFileExpiration": "0 sec",
             "prioritizers": [],
-            "bends": [],
+            "bends": [
+              {
+                "x": 400,
+                "y": 330
+              }
+            ],
             "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
             "partitioningAttribute": "",
             "loadBalanceCompression": "DO_NOT_COMPRESS",
@@ -1516,7 +1630,15 @@
               "Message Demarcator": "\n",
               "FlowFile Attribute Header Pattern": "error\\..*"
             },
-            "propertyDescriptors": {},
+            "propertyDescriptors": {
+              "Kafka Connection Service": {
+                "name": "Kafka Connection Service",
+                "displayName": "Kafka Connection Service",
+                "sensitive": false,
+                "dynamic": false,
+                "identifiesControllerService": true
+              }
+            },
             "style": {},
             "schedulingPeriod": "0 sec",
             "schedulingStrategy": "TIMER_DRIVEN",
@@ -2019,8 +2141,8 @@
           "version": "2.12.0"
         },
         "properties": {
-          "LogEvent.in": "{\n  \"type\": \"record\",\n  \"name\": \"LogEventIn\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": [\n        \"null\",\n        {\n          \"type\": \"record\",\n          \"name\": \"UserIn\",\n          \"fields\": [\n            {\n              \"name\": \"id\",\n              \"type\": \"long\"\n            },\n            {\n              \"name\": \"pwd\",\n              \"type\": [\n                \"null\",\n                \"string\"\n              ],\n              \"default\": null\n            }\n          ]\n        }\n      ],\n      \"default\": null\n    }\n  ]\n}",
-          "LogEvent.out": "{\n  \"type\": \"record\",\n  \"name\": \"LogEvent\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"ingest_ts\",\n      \"type\": [\n        \"null\",\n        \"string\"\n      ],\n      \"default\": null\n    },\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": [\n        \"null\",\n        {\n          \"type\": \"record\",\n          \"name\": \"User\",\n          \"fields\": [\n            {\n              \"name\": \"id\",\n              \"type\": \"long\"\n            }\n          ]\n        }\n      ],\n      \"default\": null\n    }\n  ]\n}"
+          "LogEvent.in": "{\n  \"type\": \"record\",\n  \"name\": \"LogEventIn\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"id\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": [\n        \"null\",\n        {\n          \"type\": \"record\",\n          \"name\": \"UserIn\",\n          \"fields\": [\n            {\n              \"name\": \"id\",\n              \"type\": \"long\"\n            },\n            {\n              \"name\": \"pwd\",\n              \"type\": [\n                \"null\",\n                \"string\"\n              ],\n              \"default\": null\n            }\n          ]\n        }\n      ],\n      \"default\": null\n    }\n  ]\n}",
+          "LogEvent.out": "{\n  \"type\": \"record\",\n  \"name\": \"LogEvent\",\n  \"namespace\": \"workshop.logs\",\n  \"fields\": [\n    {\n      \"name\": \"ingest_ts\",\n      \"type\": [\n        \"null\",\n        \"string\"\n      ],\n      \"default\": null\n    },\n    {\n      \"name\": \"id\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"ts\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"level\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"svc\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"msg\",\n      \"type\": \"string\"\n    },\n    {\n      \"name\": \"user\",\n      \"type\": [\n        \"null\",\n        {\n          \"type\": \"record\",\n          \"name\": \"User\",\n          \"fields\": [\n            {\n              \"name\": \"id\",\n              \"type\": \"long\"\n            }\n          ]\n        }\n      ],\n      \"default\": null\n    }\n  ]\n}"
         },
         "propertyDescriptors": {},
         "controllerServiceApis": [
@@ -2053,7 +2175,15 @@
           "Schema Registry": "c3e2b9b2-b761-5d52-ad7e-af4ffd73aec0",
           "Schema Name": "LogEvent.in"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Schema Registry": {
+            "name": "Schema Registry",
+            "displayName": "Schema Registry",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "controllerServiceApis": [
           {
             "type": "org.apache.nifi.serialization.RecordReaderFactory",
@@ -2084,7 +2214,15 @@
           "Schema Registry": "c3e2b9b2-b761-5d52-ad7e-af4ffd73aec0",
           "Schema Name": "LogEvent.out"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Schema Registry": {
+            "name": "Schema Registry",
+            "displayName": "Schema Registry",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "controllerServiceApis": [
           {
             "type": "org.apache.nifi.serialization.RecordReaderFactory",
@@ -2118,7 +2256,15 @@
           "Schema Registry": "c3e2b9b2-b761-5d52-ad7e-af4ffd73aec0",
           "Schema Name": "LogEvent.in"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Schema Registry": {
+            "name": "Schema Registry",
+            "displayName": "Schema Registry",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "controllerServiceApis": [
           {
             "type": "org.apache.nifi.serialization.RecordSetWriterFactory",
@@ -2152,7 +2298,15 @@
           "Schema Registry": "c3e2b9b2-b761-5d52-ad7e-af4ffd73aec0",
           "Schema Name": "LogEvent.out"
         },
-        "propertyDescriptors": {},
+        "propertyDescriptors": {
+          "Schema Registry": {
+            "name": "Schema Registry",
+            "displayName": "Schema Registry",
+            "sensitive": false,
+            "dynamic": false,
+            "identifiesControllerService": true
+          }
+        },
         "controllerServiceApis": [
           {
             "type": "org.apache.nifi.serialization.RecordSetWriterFactory",
@@ -2195,16 +2349,9 @@
           "provided": false
         },
         {
-          "name": "splunk.host",
-          "value": "splunk-sim",
-          "description": "Splunk emulator (lab-services)",
-          "sensitive": false,
-          "provided": false
-        },
-        {
-          "name": "splunk.port",
-          "value": "5514",
-          "description": "TCP input",
+          "name": "out.topic",
+          "value": "logs.clean",
+          "description": "Destination topic: clean events",
           "sensitive": false,
           "provided": false
         },
